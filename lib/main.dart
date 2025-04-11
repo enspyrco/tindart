@@ -23,7 +23,6 @@ class MainApp extends StatefulWidget {
 }
 
 class _MainAppState extends State<MainApp> {
-  Object? _error;
   String _progressString = 'waiting for selection';
   List<PlatformFile> imageFiles = [];
   double _progressNum = 0;
