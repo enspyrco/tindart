@@ -23,57 +23,71 @@ class MainApp extends StatefulWidget {
 }
 
 class _MainAppState extends State<MainApp> {
+  Object? _error;
   String _progressString = 'waiting for selection';
   List<PlatformFile> imageFiles = [];
   double _progressNum = 0;
   int _filesNum = 0;
 
   Future<void> _pickFile() async {
-    setState(() {
-      _progressString = 'copying files into app cache...';
-    });
-
-    FilePickerResult? result = await FilePicker.platform.pickFiles(
-      allowMultiple: true,
-      type: FileType.custom,
-      allowedExtensions: ['jpg'],
-    );
-
-    setState(() {
-      _progressString = 'cache is ready';
-    });
-
-    for (final PlatformFile file in result!.files) {
-      String basename = path.basename(file.path!);
-      if (basename.substring(0, 7) == 'FB_IMG_') {
-        imageFiles.add(file);
-      }
-    }
-
-    setState(() {
-      _filesNum = imageFiles.length;
-      _progressString = 'Uploading $_filesNum files...';
-    });
-
-    for (final PlatformFile file in imageFiles) {
-      Reference ref = FirebaseStorage.instance
-          .ref()
-          .child('facebook')
-          .child(path.basename(file.path!));
-
-      ref.putFile(io.File(file.path!)).then((snapshot) {
-        if (snapshot.state == TaskState.success) {
-          FirebaseFirestore.instance
-              .collection('images')
-              .add({'filePath': snapshot.ref.fullPath, 'source': 'facebook'})
-              .then((docRef) {
-                setState(() {
-                  _progressNum += 1 / imageFiles.length;
-                  _progressString = 'Uploading ${--_filesNum} files...';
-                });
-              });
-        }
+    try {
+      setState(() {
+        _progressString = 'copying files into app cache...';
       });
+
+      FilePickerResult? result = await FilePicker.platform.pickFiles(
+        allowMultiple: true,
+        type: FileType.custom,
+        allowedExtensions: ['jpg'],
+      );
+
+      setState(() {
+        _progressString = 'cache is ready';
+      });
+
+      for (final PlatformFile file in result!.files) {
+        String basename = path.basename(file.path!);
+        if (basename.substring(0, 7) == 'FB_IMG_') {
+          imageFiles.add(file);
+        }
+      }
+
+      setState(() {
+        _filesNum = imageFiles.length;
+        _progressString = 'Uploading $_filesNum files...';
+      });
+
+      for (final PlatformFile file in imageFiles) {
+        Reference ref = FirebaseStorage.instance
+            .ref()
+            .child('facebook')
+            .child(path.basename(file.path!));
+
+        ref.putFile(io.File(file.path!)).then((snapshot) {
+          if (snapshot.state == TaskState.success) {
+            FirebaseFirestore.instance
+                .collection('images')
+                .add({'filePath': snapshot.ref.fullPath, 'source': 'facebook'})
+                .then((docRef) {
+                  setState(() {
+                    _progressNum += 1 / imageFiles.length;
+                    _progressString = 'Uploading ${--_filesNum} files...';
+                  });
+                });
+          }
+        });
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(e.toString()),
+            backgroundColor: Colors.red,
+            duration: Duration(seconds: 3),
+            behavior: SnackBarBehavior.floating,
+          ),
+        );
+      }
     }
   }
 
