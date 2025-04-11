@@ -1,0 +1,48 @@
+{
+  "project_info": {
+    "project_number": "498580446520",
+    "project_id": "tindart-8c83b",
+    "storage_bucket": "tindart-8c83b.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:498580446520:android:45c196712bf33054c135cd",
+        "android_client_info": {
+          "package_name": "co.enspyr.robin"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBg_ixFqc4mfTgMedqqW1ZJtLvBX0-PVTM"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:498580446520:android:ca8ad570a7c1b5c9c135cd",
+        "android_client_info": {
+          "package_name": "co.enspyr.tindart"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBg_ixFqc4mfTgMedqqW1ZJtLvBX0-PVTM"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
