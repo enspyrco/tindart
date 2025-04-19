@@ -1,11 +1,8 @@
-import 'dart:io' as io;
-
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:file_picker/file_picker.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
-import 'package:path/path.dart' as path;
+import 'package:flutter_card_swiper/flutter_card_swiper.dart';
 import 'package:tindart/firebase_options.dart';
 
 void main() async {
@@ -23,91 +20,92 @@ class MainApp extends StatefulWidget {
 }
 
 class _MainAppState extends State<MainApp> {
-  String _progressString = 'waiting for selection';
-  List<PlatformFile> imageFiles = [];
-  double _progressNum = 0;
-  int _filesNum = 0;
+  DocumentSnapshot? lastSnapshot;
+  final List<Widget> cards = [];
+  List<String> _docIds = [];
+  bool _retrievingIds = false;
+  bool _retrievingUrls = false;
+  int index = 0;
 
-  Future<void> _pickFile() async {
-    try {
-      setState(() {
-        _progressString = 'copying files into app cache...';
-      });
+  Future<void> _getRandomisedDocIds() async {
+    setState(() {
+      _retrievingIds = true;
+    });
+    DocumentSnapshot<Map<String, dynamic>> docIdsDoc =
+        await FirebaseFirestore.instance
+            .collection('doc-id-lists')
+            .doc('kDWqPbT7U2XQxQmEHtYl')
+            .get();
 
-      FilePickerResult? result = await FilePicker.platform.pickFiles(
-        allowMultiple: true,
-        type: FileType.custom,
-        allowedExtensions: ['jpg'],
-      );
+    _docIds = List<String>.from(docIdsDoc['ids'] as List);
 
-      setState(() {
-        _progressString = 'cache is ready';
-      });
+    _docIds.shuffle();
 
-      for (final PlatformFile file in result!.files) {
-        String basename = path.basename(file.path!);
-        if (basename.substring(0, 7) == 'FB_IMG_') {
-          imageFiles.add(file);
-        }
-      }
+    setState(() {
+      _retrievingIds = false;
+    });
 
-      setState(() {
-        _filesNum = imageFiles.length;
-        _progressString = 'Uploading $_filesNum files...';
-      });
+    _retrieveNextImages();
+  }
 
-      for (final PlatformFile file in imageFiles) {
-        Reference ref = FirebaseStorage.instance
-            .ref()
-            .child('facebook')
-            .child(path.basename(file.path!));
+  Future<void> _retrieveNextImages() async {
+    setState(() {
+      _retrievingUrls = true;
+    });
 
-        ref.putFile(io.File(file.path!)).then((snapshot) {
-          if (snapshot.state == TaskState.success) {
-            FirebaseFirestore.instance
-                .collection('images')
-                .add({'filePath': snapshot.ref.fullPath, 'source': 'facebook'})
-                .then((docRef) {
-                  setState(() {
-                    _progressNum += 1 / imageFiles.length;
-                    _progressString = 'Uploading ${--_filesNum} files...';
-                  });
-                });
-          }
-        });
-      }
-    } catch (e) {
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(e.toString()),
-            backgroundColor: Colors.red,
-            duration: Duration(seconds: 3),
-            behavior: SnackBarBehavior.floating,
-          ),
-        );
-      }
+    cards.clear();
+
+    for (int i = 0; i < 5; i++) {
+      index++;
+      if (index == _docIds.length) index = 0;
+      final docSnapshot =
+          await FirebaseFirestore.instance
+              .collection("images")
+              .doc(_docIds[index])
+              .get();
+
+      final fileName = docSnapshot.data()!['name'];
+      String url =
+          await FirebaseStorage.instance.ref(fileName).getDownloadURL();
+
+      cards.add(Center(child: Image.network(url)));
     }
+
+    setState(() {
+      _retrievingUrls = false;
+    });
+  }
+
+  @override
+  void initState() {
+    super.initState();
+
+    _getRandomisedDocIds();
   }
 
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
       home: Scaffold(
-        body: Column(
-          mainAxisAlignment: MainAxisAlignment.spaceAround,
-          crossAxisAlignment: CrossAxisAlignment.center,
-          children: [
-            Center(child: Text(_progressString)),
-            LinearProgressIndicator(value: _progressNum),
-            TextButton(
-              onPressed: () {
-                _pickFile();
-              },
-              child: Text('open'),
-            ),
-          ],
-        ),
+        body:
+            (_retrievingIds || _retrievingUrls)
+                ? Center(child: CircularProgressIndicator())
+                : CardSwiper(
+                  cardsCount: cards.length,
+                  cardBuilder:
+                      (context, index, percentThresholdX, percentThresholdY) =>
+                          cards[index],
+                  onSwipe: (previousIndex, currentIndex, direction) {
+                    print(previousIndex);
+                    print(currentIndex);
+
+                    if (currentIndex == 4) {
+                      _retrieveNextImages();
+                    }
+
+                    return true;
+                  },
+                ),
       ),
     );
   }
