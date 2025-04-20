@@ -1,6 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_core/firebase_core.dart';
-import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_card_swiper/flutter_card_swiper.dart';
 import 'package:tindart/firebase_options.dart';
@@ -31,6 +30,7 @@ class _MainAppState extends State<MainApp> {
     setState(() {
       _retrievingIds = true;
     });
+
     DocumentSnapshot<Map<String, dynamic>> docIdsDoc =
         await FirebaseFirestore.instance
             .collection('doc-id-lists')
@@ -65,10 +65,19 @@ class _MainAppState extends State<MainApp> {
               .get();
 
       final fileName = docSnapshot.data()!['name'];
-      String url =
-          await FirebaseStorage.instance.ref(fileName).getDownloadURL();
 
-      cards.add(Center(child: Image.network(url)));
+      cards.add(
+        Center(
+          child: Container(
+            color: Colors.white,
+            width: double.infinity,
+            height: double.infinity,
+            child: Image.network(
+              'https://storage.googleapis.com/tindart-8c83b.firebasestorage.app/$fileName',
+            ),
+          ),
+        ),
+      );
     }
 
     setState(() {
@@ -92,13 +101,14 @@ class _MainAppState extends State<MainApp> {
                 ? Center(child: CircularProgressIndicator())
                 : CardSwiper(
                   cardsCount: cards.length,
+                  padding: const EdgeInsets.all(0),
+                  allowedSwipeDirection: const AllowedSwipeDirection.symmetric(
+                    horizontal: true,
+                  ),
                   cardBuilder:
                       (context, index, percentThresholdX, percentThresholdY) =>
                           cards[index],
                   onSwipe: (previousIndex, currentIndex, direction) {
-                    print(previousIndex);
-                    print(currentIndex);
-
                     if (currentIndex == 4) {
                       _retrieveNextImages();
                     }
