@@ -24,7 +24,7 @@ class _MainAppState extends State<MainApp> {
   List<String> _docIds = [];
   bool _retrievingIds = false;
   bool _retrievingUrls = false;
-  int index = 0;
+  int _index = 0;
 
   Future<void> _getRandomisedDocIds() async {
     setState(() {
@@ -55,16 +55,18 @@ class _MainAppState extends State<MainApp> {
 
     cards.clear();
 
-    for (int i = 0; i < 5; i++) {
-      index++;
-      if (index == _docIds.length) index = 0;
-      final docSnapshot =
-          await FirebaseFirestore.instance
-              .collection("images")
-              .doc(_docIds[index])
-              .get();
+    List<String> ids = _docIds.sublist(_index, _index + 5);
+    _index = _index + 5;
+    if (_index >= _docIds.length) _index = 0;
 
-      final fileName = docSnapshot.data()!['name'];
+    final QuerySnapshot<Map<String, dynamic>> querySnapshot =
+        await FirebaseFirestore.instance
+            .collection('images')
+            .where(FieldPath.documentId, whereIn: ids)
+            .get();
+
+    for (final doc in querySnapshot.docs) {
+      final String fileName = doc.data()['name'];
 
       cards.add(
         Center(
@@ -79,6 +81,8 @@ class _MainAppState extends State<MainApp> {
         ),
       );
     }
+
+    cards.add(Center(child: CircularProgressIndicator()));
 
     setState(() {
       _retrievingUrls = false;
@@ -109,7 +113,7 @@ class _MainAppState extends State<MainApp> {
                       (context, index, percentThresholdX, percentThresholdY) =>
                           cards[index],
                   onSwipe: (previousIndex, currentIndex, direction) {
-                    if (currentIndex == 4) {
+                    if (currentIndex == 5) {
                       _retrieveNextImages();
                     }
 
