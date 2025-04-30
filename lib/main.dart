@@ -1,7 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';
-import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_card_swiper/flutter_card_swiper.dart';
 import 'package:go_router/go_router.dart';
@@ -32,7 +31,6 @@ void main() async {
 
   // Setup the data layer of the "data layer architecture"
   final firestore = FirebaseFirestore.instance;
-  final storage = FirebaseStorage.instance;
   final auth = FirebaseAuth.instance;
 
   // The services make up the repositories layer of the "data layer architecture"
