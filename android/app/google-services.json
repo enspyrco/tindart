@@ -7,31 +7,25 @@
   "client": [
     {
       "client_info": {
-        "mobilesdk_app_id": "1:498580446520:android:45c196712bf33054c135cd",
-        "android_client_info": {
-          "package_name": "co.enspyr.robin"
-        }
-      },
-      "oauth_client": [],
-      "api_key": [
-        {
-          "current_key": "AIzaSyBg_ixFqc4mfTgMedqqW1ZJtLvBX0-PVTM"
-        }
-      ],
-      "services": {
-        "appinvite_service": {
-          "other_platform_oauth_client": []
-        }
-      }
-    },
-    {
-      "client_info": {
         "mobilesdk_app_id": "1:498580446520:android:ca8ad570a7c1b5c9c135cd",
         "android_client_info": {
           "package_name": "co.enspyr.tindart"
         }
       },
-      "oauth_client": [],
+      "oauth_client": [
+        {
+          "client_id": "498580446520-inqkn6pbj7e7amjqd5sp4v9adtf8ljsn.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "co.enspyr.tindart",
+            "certificate_hash": "87f20b5916c54a08596a30d4a754f6c98a2ca1d8"
+          }
+        },
+        {
+          "client_id": "498580446520-1k97o45ftqc7htv00ahio8jmrmqcfp6q.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
       "api_key": [
         {
           "current_key": "AIzaSyBg_ixFqc4mfTgMedqqW1ZJtLvBX0-PVTM"
@@ -39,7 +33,19 @@
       ],
       "services": {
         "appinvite_service": {
-          "other_platform_oauth_client": []
+          "other_platform_oauth_client": [
+            {
+              "client_id": "498580446520-1k97o45ftqc7htv00ahio8jmrmqcfp6q.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "498580446520-2ucvd1ugvn7n637bkq51vaojaofg9o8g.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "co.enspyr.tindart"
+              }
+            }
+          ]
         }
       }
     }

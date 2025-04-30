@@ -1,24 +1,65 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';
+import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_card_swiper/flutter_card_swiper.dart';
+import 'package:go_router/go_router.dart';
+import 'package:tindart/auth/auth_service.dart';
+import 'package:tindart/auth/sign_in_screen.dart';
 import 'package:tindart/firebase_options.dart';
+import 'package:tindart/utils/locator.dart';
 
+final _router = GoRouter(
+  initialLocation:
+      locate<AuthService>().currentUserId == null ? '/signin' : '/',
+  routes: [
+    GoRoute(
+      name: 'home',
+      path: '/',
+      builder: (context, state) => const HomeScreen(),
+    ),
+    GoRoute(
+      name: 'signin',
+      path: '/signin',
+      builder: (context, state) => const SignInScreen(),
+    ),
+  ],
+);
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
 
+  // Setup the data layer of the "data layer architecture"
+  final firestore = FirebaseFirestore.instance;
+  final storage = FirebaseStorage.instance;
+  final auth = FirebaseAuth.instance;
+
+  // The services make up the repositories layer of the "data layer architecture"
+  Locator.add<AuthService>(
+    AuthService(firebaseAuth: auth, firestore: firestore),
+  );
+
   runApp(const MainApp());
 }
 
-class MainApp extends StatefulWidget {
+class MainApp extends StatelessWidget {
   const MainApp({super.key});
 
   @override
-  State<MainApp> createState() => _MainAppState();
+  Widget build(BuildContext context) {
+    return MaterialApp.router(routerConfig: _router);
+  }
 }
 
-class _MainAppState extends State<MainApp> {
+class HomeScreen extends StatefulWidget {
+  const HomeScreen({super.key});
+
+  @override
+  State<HomeScreen> createState() => _HomeScreenState();
+}
+
+class _HomeScreenState extends State<HomeScreen> {
   DocumentSnapshot? lastSnapshot;
   final List<Widget> cards = [];
   List<String> _docIds = [];
@@ -98,29 +139,27 @@ class _MainAppState extends State<MainApp> {
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      home: Scaffold(
-        body:
-            (_retrievingIds || _retrievingUrls)
-                ? Center(child: CircularProgressIndicator())
-                : CardSwiper(
-                  cardsCount: cards.length,
-                  padding: const EdgeInsets.all(0),
-                  allowedSwipeDirection: const AllowedSwipeDirection.symmetric(
-                    horizontal: true,
-                  ),
-                  cardBuilder:
-                      (context, index, percentThresholdX, percentThresholdY) =>
-                          cards[index],
-                  onSwipe: (previousIndex, currentIndex, direction) {
-                    if (currentIndex == 5) {
-                      _retrieveNextImages();
-                    }
-
-                    return true;
-                  },
+    return Scaffold(
+      body:
+          (_retrievingIds || _retrievingUrls)
+              ? Center(child: CircularProgressIndicator())
+              : CardSwiper(
+                cardsCount: cards.length,
+                padding: const EdgeInsets.all(0),
+                allowedSwipeDirection: const AllowedSwipeDirection.symmetric(
+                  horizontal: true,
                 ),
-      ),
+                cardBuilder:
+                    (context, index, percentThresholdX, percentThresholdY) =>
+                        cards[index],
+                onSwipe: (previousIndex, currentIndex, direction) {
+                  if (currentIndex == 5) {
+                    _retrieveNextImages();
+                  }
+
+                  return true;
+                },
+              ),
     );
   }
 }

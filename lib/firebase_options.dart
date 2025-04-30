@@ -63,6 +63,9 @@ class DefaultFirebaseOptions {
     messagingSenderId: '498580446520',
     projectId: 'tindart-8c83b',
     storageBucket: 'tindart-8c83b.firebasestorage.app',
+    androidClientId: '498580446520-inqkn6pbj7e7amjqd5sp4v9adtf8ljsn.apps.googleusercontent.com',
+    iosClientId: '498580446520-2ucvd1ugvn7n637bkq51vaojaofg9o8g.apps.googleusercontent.com',
     iosBundleId: 'co.enspyr.tindart',
   );
+
 }
