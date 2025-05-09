@@ -2,8 +2,8 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_card_swiper/flutter_card_swiper.dart';
-import 'package:tindart/card_back.dart';
-import 'package:tindart/flip_card.dart';
+import 'package:tindart/cards/card_back.dart';
+import 'package:tindart/cards/flip_card.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
