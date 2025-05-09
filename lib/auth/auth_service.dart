@@ -5,6 +5,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/foundation.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:rxdart/subjects.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class AuthService {
   AuthService({
@@ -48,6 +49,12 @@ class AuthService {
     return _auth.currentUser?.uid;
   }
 
+  /// Check shared prefs for onboarding status.
+  Future<bool> get userHasOnboarded async {
+    final prefs = await SharedPreferences.getInstance();
+    return prefs.getBool('onboarded') ?? false;
+  }
+
   Future<void> signInWithGoogle() async {
     if (kIsWeb) {
       GoogleAuthProvider googleProvider = GoogleAuthProvider();
@@ -81,5 +88,9 @@ class AuthService {
   Future<void> signOut() async {
     await profileStreamSubscription?.cancel();
     return _auth.signOut();
+  }
+
+  Future<void> deleteAccount() async {
+    await _auth.currentUser?.delete();
   }
 }
