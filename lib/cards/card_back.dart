@@ -1,5 +1,7 @@
+import 'package:cloud_functions/cloud_functions.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:tindart/auth/auth_service.dart';
 import 'package:tindart/utils/locator.dart';
 
@@ -12,6 +14,16 @@ class CardBack extends StatefulWidget {
 
 class _CardBackState extends State<CardBack> {
   bool _deleting = false;
+
+  Future<void> _signOut() async {
+    // SharedPreferences.getInstance().then((prefs) {
+    //   prefs.clear();
+    // });
+    await locate<AuthService>().signOut();
+    if (mounted) {
+      context.go('/signin');
+    }
+  }
 
   Future<void> _showDeleteConfirmation(BuildContext context) async {
     final confirmed = await showDialog<bool>(
@@ -55,6 +67,9 @@ class _CardBackState extends State<CardBack> {
     );
 
     if (confirmed == true) {
+      SharedPreferences.getInstance().then((prefs) {
+        prefs.clear();
+      });
       // Perform the deletion
       _deleteAccount();
     }
@@ -64,7 +79,11 @@ class _CardBackState extends State<CardBack> {
     setState(() {
       _deleting = true;
     });
-    await locate<AuthService>().deleteAccount();
+    final result =
+        await FirebaseFunctions.instance
+            .httpsCallable('deleteUserAccount')
+            .call();
+    print(result.data.toString());
     setState(() {
       _deleting = false;
     });
@@ -84,18 +103,21 @@ class _CardBackState extends State<CardBack> {
             onSelected: (value) {
               if (value == 'Delete' && !_deleting) {
                 _showDeleteConfirmation(context);
+              } else if (value == 'SignOut') {
+                _signOut();
               }
             },
             itemBuilder:
                 (BuildContext context) => [
                   const PopupMenuItem<String>(
+                    value: 'SignOut',
+                    child: Text('Sign Out'),
+                  ),
+                  const PopupMenuItem<String>(
                     value: 'Delete',
                     child: Text('Delete Account'),
                   ),
-                  // const PopupMenuItem<String>(
-                  //   value: 'Help',
-                  //   child: Text('Help'),
-                  // ),
+
                   // const PopupMenuItem<String>(
                   //   value: 'About',
                   //   child: Text('About'),

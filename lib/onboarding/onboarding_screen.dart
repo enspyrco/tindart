@@ -1,0 +1,114 @@
+import 'package:flutter/gestures.dart';
+import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import 'package:tindart/auth/auth_service.dart';
+import 'package:tindart/utils/locator.dart';
+
+class OnboardingScreen extends StatefulWidget {
+  const OnboardingScreen({super.key});
+
+  @override
+  State<OnboardingScreen> createState() => _OnboardingScreenState();
+}
+
+class _OnboardingScreenState extends State<OnboardingScreen> {
+  bool _isChecked = false;
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(title: const Text('Welcome to TindArt')),
+      body: SafeArea(
+        child: Stack(
+          children: [
+            // Top section with checkbox and text with link
+            Padding(
+              padding: const EdgeInsets.all(24.0),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  const Text(
+                    'Swipe left on art you like less and right on art you like more.\n\nDouble tap to get metadata and account options',
+                    style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                  ),
+                  SizedBox(height: 50),
+                  Row(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Checkbox(
+                        value: _isChecked,
+                        onChanged: (value) {
+                          setState(() {
+                            _isChecked = value ?? false;
+                          });
+                        },
+                      ),
+                      Expanded(
+                        child: Padding(
+                          padding: const EdgeInsets.only(top: 12.0),
+                          child: RichText(
+                            text: TextSpan(
+                              style: TextStyle(
+                                color:
+                                    Theme.of(
+                                      context,
+                                    ).textTheme.bodyMedium?.color,
+                                fontSize: 16.0,
+                              ),
+                              children: [
+                                const TextSpan(text: 'I agree to TindArt\'s '),
+                                TextSpan(
+                                  text: 'Privacy Policy',
+                                  style: const TextStyle(
+                                    color: Colors.blue,
+                                    decoration: TextDecoration.underline,
+                                  ),
+                                  recognizer:
+                                      TapGestureRecognizer()
+                                        ..onTap = () {
+                                          context.push('/privacy-policy');
+                                        },
+                                ),
+                                const TextSpan(
+                                  text: ' and confirm that I have read it.',
+                                ),
+                              ],
+                            ),
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+            ),
+
+            // Done Button in bottom right
+            Positioned(
+              right: 24.0,
+              bottom: 24.0,
+              child: ElevatedButton(
+                onPressed:
+                    _isChecked
+                        ? () {
+                          SharedPreferences.getInstance().then((prefs) {
+                            prefs.setBool('onboarded', true);
+                          });
+                          // Navigate to the next screen if checkbox is checked
+                          if (locate<AuthService>().currentUserId == null) {
+                            context.go('/signin');
+                          } else {
+                            context.go('/');
+                          }
+                        }
+                        : null, // Button is disabled if checkbox is not checked
+                child: const Text('Done'),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}

@@ -10,6 +10,8 @@ import 'package:tindart/auth/auth_service.dart';
 import 'package:tindart/auth/sign_in_screen.dart';
 import 'package:tindart/firebase_options.dart';
 import 'package:tindart/home_screen.dart';
+import 'package:tindart/onboarding/onboarding_screen.dart';
+import 'package:tindart/onboarding/privacy_policy_screen.dart';
 import 'package:tindart/utils/locator.dart';
 
 final _router = GoRouter(
@@ -20,11 +22,29 @@ final _router = GoRouter(
       name: 'home',
       path: '/',
       builder: (context, state) => const HomeScreen(),
+      redirect: (BuildContext context, GoRouterState state) async {
+        bool onboarded = await locate<AuthService>().userHasOnboarded;
+        if (!onboarded) {
+          return '/onboarding-screen';
+        } else {
+          return null;
+        }
+      },
     ),
     GoRoute(
       name: 'signin',
       path: '/signin',
       builder: (context, state) => const SignInScreen(),
+    ),
+    GoRoute(
+      name: 'onboarding-screen',
+      path: '/onboarding-screen',
+      builder: (context, state) => const OnboardingScreen(),
+    ),
+    GoRoute(
+      name: 'privacy-policy',
+      path: '/privacy-policy',
+      builder: (context, state) => const PrivacyPolicyScreen(),
     ),
   ],
 );
