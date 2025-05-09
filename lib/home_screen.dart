@@ -2,6 +2,8 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_card_swiper/flutter_card_swiper.dart';
+import 'package:tindart/card_back.dart';
+import 'package:tindart/flip_card.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -61,15 +63,18 @@ class _HomeScreenState extends State<HomeScreen> {
       final String fileName = doc.data()['name'];
 
       cards.add(
-        Center(
-          child: Container(
-            color: Colors.white,
-            width: double.infinity,
-            height: double.infinity,
-            child: Image.network(
-              'https://storage.googleapis.com/tindart-8c83b.firebasestorage.app/$fileName',
+        FlipCard(
+          front: Center(
+            child: Container(
+              color: Colors.white,
+              width: double.infinity,
+              height: double.infinity,
+              child: Image.network(
+                'https://storage.googleapis.com/tindart-8c83b.firebasestorage.app/$fileName',
+              ),
             ),
           ),
+          back: CardBack(),
         ),
       );
     }
