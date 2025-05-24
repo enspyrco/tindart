@@ -29,7 +29,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   const Text(
-                    'Swipe left on art you like less and right on art you like more.\n\nDouble tap to get metadata and account options',
+                    'Swipe left on art you like less and right on art you like more.\n\nDouble tap to get metadata and account options.',
                     style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
                   ),
                   SizedBox(height: 50),
