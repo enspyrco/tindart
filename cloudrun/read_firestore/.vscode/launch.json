@@ -1,0 +1,11 @@
+{
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "name": "Read Firestore",
+      "type": "dart",
+      "request": "launch",
+      "program": "bin/read_firestore.dart"
+    }
+  ]
+}

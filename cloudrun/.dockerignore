@@ -1,0 +1,7 @@
+**/.git
+**/.dart_tool
+**/build
+**/.idea
+**/*.iml
+**/node_modules
+**/.DS_Store
