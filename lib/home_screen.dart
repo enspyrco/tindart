@@ -53,6 +53,8 @@ class _HomeScreenState extends State<HomeScreen> {
     _index = _index + 5;
     if (_index >= _docIds.length) _index = 0;
 
+    // Retrieve all `images` documents where the document's id is in the `ids`
+    // list
     final QuerySnapshot<Map<String, dynamic>> querySnapshot =
         await FirebaseFirestore.instance
             .collection('images')

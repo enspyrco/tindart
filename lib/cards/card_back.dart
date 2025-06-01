@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:tindart/auth/auth_service.dart';
+import 'package:tindart/users/users_service.dart';
 import 'package:tindart/utils/locator.dart';
 
 class CardBack extends StatefulWidget {
@@ -79,11 +80,10 @@ class _CardBackState extends State<CardBack> {
     setState(() {
       _deleting = true;
     });
-    final result =
+    final _ =
         await FirebaseFunctions.instance
             .httpsCallable('deleteUserAccount')
             .call();
-    print(result.data.toString());
     setState(() {
       _deleting = false;
     });
@@ -140,6 +140,12 @@ class _CardBackState extends State<CardBack> {
                         'Select the menu button to manage your account.',
                         style: TextStyle(fontSize: 18),
                       ),
+                    ),
+                    FutureBuilder(
+                      future: locate<UsersService>().retrieveViewedImages(),
+                      builder: (context, asyncSnapshot) {
+                        return Row(children: [Text('Count: ')]);
+                      },
                     ),
                   ],
                 ),

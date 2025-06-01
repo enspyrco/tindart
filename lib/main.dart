@@ -12,6 +12,7 @@ import 'package:tindart/firebase_options.dart';
 import 'package:tindart/home_screen.dart';
 import 'package:tindart/onboarding/onboarding_screen.dart';
 import 'package:tindart/onboarding/privacy_policy_screen.dart';
+import 'package:tindart/users/users_service.dart';
 import 'package:tindart/utils/locator.dart';
 
 final _router = GoRouter(
@@ -67,9 +68,8 @@ void main() async {
   final auth = FirebaseAuth.instance;
 
   // The services make up the repositories layer of the "data layer architecture"
-  Locator.add<AuthService>(
-    AuthService(firebaseAuth: auth, firestore: firestore),
-  );
+  Locator.add<AuthService>(AuthService(auth: auth, firestore: firestore));
+  Locator.add<UsersService>(UsersService(auth: auth, firestore: firestore));
 
   runApp(const MainApp());
 }
