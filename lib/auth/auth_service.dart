@@ -77,6 +77,8 @@ class AuthService {
 
   Future<void> signInWithApple() async {
     final appleProvider = AppleAuthProvider();
+    appleProvider.addScope('email');
+    appleProvider.addScope('name');
 
     if (kIsWeb) {
       final _ = await FirebaseAuth.instance.signInWithPopup(appleProvider);
