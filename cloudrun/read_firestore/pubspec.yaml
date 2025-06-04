@@ -10,7 +10,6 @@ dependencies:
   googleapis: ^14.0.0
   googleapis_auth: ^2.0.0
   csv: ^6.0.0
-  args: ^2.4.0
   http: ^1.4.0
 
 dev_dependencies:
