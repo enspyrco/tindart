@@ -123,6 +123,7 @@ class _HomeScreenState extends State<HomeScreen> {
                             'disliked': FieldValue.arrayUnion([
                               _docIds[currentIndex],
                             ]),
+                            'timestamp': FieldValue.serverTimestamp(),
                           }, SetOptions(merge: true));
 
                       FirebaseFirestore.instance
@@ -146,6 +147,7 @@ class _HomeScreenState extends State<HomeScreen> {
                             'liked': FieldValue.arrayUnion([
                               _docIds[currentIndex],
                             ]),
+                            'timestamp': FieldValue.serverTimestamp(),
                           }, SetOptions(merge: true));
 
                       FirebaseFirestore.instance
