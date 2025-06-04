@@ -28,7 +28,7 @@ class _HomeScreenState extends State<HomeScreen> {
     DocumentSnapshot<Map<String, dynamic>> docIdsDoc =
         await FirebaseFirestore.instance
             .collection('doc-id-lists')
-            .doc('kDWqPbT7U2XQxQmEHtYl')
+            .doc('RMCevRY4dGpUTTcrltun')
             .get();
 
     _docIds = List<String>.from(docIdsDoc['ids'] as List);
@@ -117,6 +117,15 @@ class _HomeScreenState extends State<HomeScreen> {
                     if (currentIndex != null &&
                         direction == CardSwiperDirection.left) {
                       FirebaseFirestore.instance
+                          .collection('preferences')
+                          .doc(FirebaseAuth.instance.currentUser!.uid)
+                          .set({
+                            'disliked': FieldValue.arrayUnion([
+                              _docIds[currentIndex],
+                            ]),
+                          }, SetOptions(merge: true));
+
+                      FirebaseFirestore.instance
                           .collection('images')
                           .doc(_docIds[currentIndex])
                           .set({
@@ -130,6 +139,15 @@ class _HomeScreenState extends State<HomeScreen> {
 
                     if (currentIndex != null &&
                         direction == CardSwiperDirection.right) {
+                      FirebaseFirestore.instance
+                          .collection('preferences')
+                          .doc(FirebaseAuth.instance.currentUser!.uid)
+                          .set({
+                            'liked': FieldValue.arrayUnion([
+                              _docIds[currentIndex],
+                            ]),
+                          }, SetOptions(merge: true));
+
                       FirebaseFirestore.instance
                           .collection('images')
                           .doc(_docIds[currentIndex])
