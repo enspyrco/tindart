@@ -20,7 +20,7 @@ class UsersService {
 
     final AggregateQuerySnapshot snapshot =
         await _firestore
-            .collection('images')
+            .collection('image-docs')
             .where(
               Filter.or(
                 Filter('liked', arrayContains: userId),

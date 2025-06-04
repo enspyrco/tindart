@@ -57,7 +57,7 @@ class _HomeScreenState extends State<HomeScreen> {
     // list
     final QuerySnapshot<Map<String, dynamic>> querySnapshot =
         await FirebaseFirestore.instance
-            .collection('images')
+            .collection('image-docs')
             .where(FieldPath.documentId, whereIn: ids)
             .get();
 
@@ -127,7 +127,7 @@ class _HomeScreenState extends State<HomeScreen> {
                           }, SetOptions(merge: true));
 
                       FirebaseFirestore.instance
-                          .collection('images')
+                          .collection('image-docs')
                           .doc(_docIds[currentIndex])
                           .set({
                             'disliked': FieldValue.arrayUnion([
@@ -151,7 +151,7 @@ class _HomeScreenState extends State<HomeScreen> {
                           }, SetOptions(merge: true));
 
                       FirebaseFirestore.instance
-                          .collection('images')
+                          .collection('image-docs')
                           .doc(_docIds[currentIndex])
                           .set({
                             'liked': FieldValue.arrayUnion([

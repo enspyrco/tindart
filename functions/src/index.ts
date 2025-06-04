@@ -16,7 +16,7 @@ export const deleteUserAccount = functions.https.onCall(
 
       console.log(`User ${userId} is being removed`);
 
-      const likedSnapshot = await firestore.collection('images')
+      const likedSnapshot = await firestore.collection('image-docs')
         .where('liked', 'array-contains', userId)
         .get();
 
@@ -26,7 +26,7 @@ export const deleteUserAccount = functions.https.onCall(
 
       console.log(`${likedSnapshot.docs.length} likes removed`);
 
-      const dislikedSnapshot = await firestore.collection('images')
+      const dislikedSnapshot = await firestore.collection('image-docs')
         .where('disliked', 'array-contains', userId)
         .get();
 
