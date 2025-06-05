@@ -16,6 +16,9 @@ export const deleteUserAccount = functions.https.onCall(
 
       console.log(`User ${userId} is being removed`);
 
+      firestore.collection('preferences').doc(userId).delete();
+      console.log(`Document preferences/${userId} deleted successfully`);
+
       const likedSnapshot = await firestore.collection('image-docs')
         .where('liked', 'array-contains', userId)
         .get();
