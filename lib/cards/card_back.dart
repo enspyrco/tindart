@@ -143,8 +143,12 @@ class _CardBackState extends State<CardBack> {
                     ),
                     FutureBuilder(
                       future: locate<UsersService>().retrieveViewedImages(),
-                      builder: (context, asyncSnapshot) {
-                        return Row(children: [Text('Count: ')]);
+                      builder: (context, snapshot) {
+                        String number = 'null';
+                        if (snapshot.hasData) {
+                          number = snapshot.data!.toString();
+                        }
+                        return Text('You have swiped $number images.');
                       },
                     ),
                   ],
