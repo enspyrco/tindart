@@ -18,18 +18,14 @@ class UsersService {
 
     String userId = _auth.currentUser!.uid;
 
-    final AggregateQuerySnapshot snapshot =
-        await _firestore
-            .collection('image-docs')
-            .where(
-              Filter.or(
-                Filter('liked', arrayContains: userId),
-                Filter('disliked', arrayContains: userId),
-              ),
-            )
-            .count()
-            .get();
+    final snapshot =
+        await _firestore.collection('preferences').doc(userId).get();
 
-    return snapshot.count!;
+    Map<String, Object?> data = snapshot.data() ?? {};
+
+    List liked = data['liked'] as List? ?? [];
+    List disliked = data['disliked'] as List? ?? [];
+
+    return liked.length + disliked.length;
   }
 }
