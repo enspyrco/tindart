@@ -4,7 +4,8 @@ import 'package:go_router/go_router.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:tindart/auth/auth_service.dart';
 import 'package:tindart/utils/locator.dart';
-import 'package:cloud_firestore/cloud_firestore.dart'; // Added for Firestore interaction
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'dart:async';
 
 class OnboardingScreen extends StatefulWidget {
   const OnboardingScreen({super.key});
@@ -16,6 +17,7 @@ class OnboardingScreen extends StatefulWidget {
 class _OnboardingScreenState extends State<OnboardingScreen> {
   bool _isChecked = false;
   final TextEditingController _nameController = TextEditingController();
+  bool _isSaving = false;
 
   @override
   void initState() {
@@ -58,17 +60,28 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
       return false; // Indicate failure
     }
 
-    final name =
-        _nameController.text.trim(); // Get the trimmed text from the name field
+    final name = _nameController.text.trim();
 
     try {
-      await FirebaseFirestore.instance.collection('profiles').doc(userId).set({
-        'name': name,
-      }, SetOptions(merge: true));
+      await FirebaseFirestore.instance
+          .collection('profiles')
+          .doc(userId)
+          .set({'name': name}, SetOptions(merge: true))
+          .timeout(const Duration(seconds: 5));
 
       if (!context.mounted) return false;
 
       return true; // Indicate success
+    } on TimeoutException {
+      // Catch TimeoutException specifically for network issues
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text(
+            'Network error: Could not save profile. Please check your internet connection.',
+          ),
+        ),
+      );
+      return false; // Indicate failure
     } on FirebaseException catch (e) {
       // Catch specific Firebase exceptions for better error handling
       ScaffoldMessenger.of(context).showSnackBar(
@@ -188,17 +201,26 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
               ),
             ),
 
-            // Done Button in bottom right
+            // Done Button / CircularProgressIndicator in bottom right
             Positioned(
               right: 24.0,
               bottom: 24.0,
               child: ElevatedButton(
-                // Button is enabled only if _isChecked is true AND _nameController is not empty
+                // Button is enabled only if _isChecked is true AND _nameController is not empty AND not currently saving
                 onPressed:
-                    isButtonEnabled
+                    (isButtonEnabled && !_isSaving)
                         ? () async {
+                          setState(() {
+                            _isSaving = true; // Start showing loading indicator
+                          });
+
                           // Attempt to save the profile name to Firestore
                           final bool saveSuccess = await _saveProfile(context);
+
+                          setState(() {
+                            _isSaving =
+                                false; // Stop showing loading indicator, re-enable button
+                          });
 
                           // Only proceed with onboarding completion and navigation if save was successful
                           if (saveSuccess) {
@@ -217,7 +239,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                           // If saveSuccess is false, _saveProfile already showed an error message,
                           // so no further action is needed here, and navigation will not occur.
                         }
-                        : null, // Button is disabled if conditions are not met
+                        : null, // Button is disabled if conditions are not met or if saving
                 style: ElevatedButton.styleFrom(
                   padding: const EdgeInsets.symmetric(
                     horizontal: 30,
@@ -227,7 +249,17 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                     borderRadius: BorderRadius.circular(10),
                   ),
                 ),
-                child: const Text('Done', style: TextStyle(fontSize: 18)),
+                child:
+                    _isSaving
+                        ? const SizedBox(
+                          width: 24,
+                          height: 24,
+                          child: CircularProgressIndicator(
+                            color: Colors.white,
+                            strokeWidth: 2,
+                          ),
+                        )
+                        : const Text('Done', style: TextStyle(fontSize: 18)),
               ),
             ),
           ],
