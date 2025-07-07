@@ -12,6 +12,7 @@ import 'package:tindart/firebase_options.dart';
 import 'package:tindart/home_screen.dart';
 import 'package:tindart/onboarding/onboarding_screen.dart';
 import 'package:tindart/onboarding/privacy_policy_screen.dart';
+import 'package:tindart/users/profile_screen.dart';
 import 'package:tindart/users/users_service.dart';
 import 'package:tindart/utils/locator.dart';
 
@@ -46,6 +47,11 @@ final _router = GoRouter(
       name: 'privacy-policy',
       path: '/privacy-policy',
       builder: (context, state) => const PrivacyPolicyScreen(),
+    ),
+    GoRoute(
+      name: 'profile',
+      path: '/profile',
+      builder: (context, state) => const ProfileScreen(),
     ),
   ],
 );

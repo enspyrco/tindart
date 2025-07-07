@@ -105,6 +105,8 @@ class _CardBackState extends State<CardBack> {
                 _showDeleteConfirmation(context);
               } else if (value == 'SignOut') {
                 _signOut();
+              } else if (value == 'Profile') {
+                context.push('/profile');
               }
             },
             itemBuilder:
@@ -117,11 +119,10 @@ class _CardBackState extends State<CardBack> {
                     value: 'Delete',
                     child: Text('Delete Account'),
                   ),
-
-                  // const PopupMenuItem<String>(
-                  //   value: 'About',
-                  //   child: Text('About'),
-                  // ),
+                  const PopupMenuItem<String>(
+                    value: 'Profile',
+                    child: Text('Profile'),
+                  ),
                 ],
           ),
         ],
