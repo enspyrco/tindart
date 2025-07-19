@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:tindart/auth/auth_service.dart';
-import 'package:tindart/users/users_service.dart';
+import 'package:tindart/cards/comments_widget.dart';
 import 'package:tindart/utils/locator.dart';
 
 class CardBack extends StatefulWidget {
@@ -128,32 +128,7 @@ class _CardBackState extends State<CardBack> {
         ],
       ),
       body: Center(
-        child:
-            _deleting
-                ? CircularProgressIndicator()
-                : Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    const SizedBox(height: 20),
-                    Padding(
-                      padding: const EdgeInsets.all(18.0),
-                      child: const Text(
-                        'Select the menu button to manage your account.',
-                        style: TextStyle(fontSize: 18),
-                      ),
-                    ),
-                    FutureBuilder(
-                      future: locate<UsersService>().retrieveViewedImages(),
-                      builder: (context, snapshot) {
-                        String number = 'null';
-                        if (snapshot.hasData) {
-                          number = snapshot.data!.toString();
-                        }
-                        return Text('You have swiped $number images.');
-                      },
-                    ),
-                  ],
-                ),
+        child: _deleting ? CircularProgressIndicator() : CommentsWidget(),
       ),
     );
   }
