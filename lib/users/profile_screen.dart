@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:tindart/auth/auth_service.dart'; // Assuming AuthService is correctly located
+import 'package:tindart/users/users_service.dart';
 import 'package:tindart/utils/locator.dart'; // Assuming locator is correctly set up
 import 'package:go_router/go_router.dart'; // For navigation
 
@@ -227,6 +228,17 @@ class _ProfileScreenState extends State<ProfileScreen> {
                         'Save Username',
                         style: TextStyle(fontSize: 18),
                       ),
+            ),
+            const SizedBox(height: 30),
+            FutureBuilder(
+              future: locate<UsersService>().retrieveViewedImages(),
+              builder: (context, snapshot) {
+                String number = 'null';
+                if (snapshot.hasData) {
+                  number = snapshot.data!.toString();
+                }
+                return Text('You have swiped $number images.');
+              },
             ),
           ],
         ),
