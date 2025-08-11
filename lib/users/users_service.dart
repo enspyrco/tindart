@@ -28,4 +28,18 @@ class UsersService {
 
     return liked.length + disliked.length;
   }
+
+  Future<String> getUserName() async {
+    String userId = _auth.currentUser!.uid;
+
+    DocumentSnapshot doc =
+        await _firestore.collection('profiles').doc(userId).get();
+    if (doc.exists && doc.data() != null) {
+      final data = doc.data() as Map<String, dynamic>;
+      return data['name'] as String? ??
+          ''; // Assuming 'name' field holds the username
+    } else {
+      return '';
+    }
+  }
 }

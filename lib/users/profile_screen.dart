@@ -1,5 +1,5 @@
-import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:flutter/material.dart';
 import 'package:tindart/auth/auth_service.dart'; // Assuming AuthService is correctly located
 import 'package:tindart/users/users_service.dart';
 import 'package:tindart/utils/locator.dart'; // Assuming locator is correctly set up
@@ -47,22 +47,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
     });
 
     try {
-      DocumentSnapshot doc =
-          await FirebaseFirestore.instance
-              .collection('profiles')
-              .doc(userId)
-              .get();
-
-      if (doc.exists && doc.data() != null) {
-        final data = doc.data() as Map<String, dynamic>;
-        _initialUsername =
-            data['name'] as String?; // Assuming 'name' field holds the username
-        _usernameController.text =
-            _initialUsername ?? ''; // Pre-fill the text field
-      } else {
-        _initialUsername = ''; // No existing profile or name
-        _usernameController.text = '';
-      }
+      String initialUsername = await locate<UsersService>().getUserName();
+      _usernameController.text = initialUsername; // Pre-fill the text field
     } on FirebaseException catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(

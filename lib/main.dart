@@ -8,6 +8,7 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:tindart/auth/auth_service.dart';
 import 'package:tindart/auth/sign_in_screen.dart';
+import 'package:tindart/comments/comments_service.dart';
 import 'package:tindart/firebase_options.dart';
 import 'package:tindart/home_screen.dart';
 import 'package:tindart/onboarding/onboarding_screen.dart';
@@ -76,6 +77,9 @@ void main() async {
   // The services make up the repositories layer of the "data layer architecture"
   Locator.add<AuthService>(AuthService(auth: auth, firestore: firestore));
   Locator.add<UsersService>(UsersService(auth: auth, firestore: firestore));
+  Locator.add<CommentsService>(
+    CommentsService(auth: auth, firestore: firestore),
+  );
 
   runApp(const MainApp());
 }

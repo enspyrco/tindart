@@ -3,11 +3,13 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:tindart/auth/auth_service.dart';
-import 'package:tindart/cards/comments_widget.dart';
+import 'package:tindart/comments/comments_widget.dart';
 import 'package:tindart/utils/locator.dart';
 
 class CardBack extends StatefulWidget {
-  const CardBack({super.key});
+  const CardBack({required this.fileName, super.key});
+
+  final String fileName;
 
   @override
   State<CardBack> createState() => _CardBackState();
@@ -128,7 +130,10 @@ class _CardBackState extends State<CardBack> {
         ],
       ),
       body: Center(
-        child: _deleting ? CircularProgressIndicator() : CommentsWidget(),
+        child:
+            _deleting
+                ? CircularProgressIndicator()
+                : CommentsWidget(imageId: widget.fileName),
       ),
     );
   }

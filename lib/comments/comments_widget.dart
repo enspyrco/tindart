@@ -2,10 +2,15 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:tindart/auth/auth_service.dart';
+import 'package:tindart/comments/comments_service.dart';
+import 'package:tindart/comments/models/comment.dart';
+import 'package:tindart/users/users_service.dart';
 import 'package:tindart/utils/locator.dart';
 
 class CommentsWidget extends StatefulWidget {
-  const CommentsWidget({super.key});
+  const CommentsWidget({required this.imageId, super.key});
+
+  final String imageId;
 
   @override
   State<CommentsWidget> createState() => _CommentsWidgetState();
@@ -13,8 +18,6 @@ class CommentsWidget extends StatefulWidget {
 
 class _CommentsWidgetState extends State<CommentsWidget> {
   final TextEditingController _commentController = TextEditingController();
-  final FirebaseFirestore _firestore = FirebaseFirestore.instance;
-  final FirebaseAuth _auth = FirebaseAuth.instance; // Get FirebaseAuth instance
   bool _isPostingComment = false; // To show loading indicator on post button
 
   // Function to add a new comment to Firestore
@@ -29,11 +32,9 @@ class _CommentsWidgetState extends State<CommentsWidget> {
 
     final String? userId =
         locate<AuthService>().currentUserId; // Get current user ID
-    final String? userName =
-        _auth.currentUser?.displayName ??
-        'Anonymous'; // Get user's display name or default
+    final String userName = await locate<UsersService>().getUserName();
 
-    if (userId == null) {
+    if (userId == null && mounted) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
           content: Text('You must be logged in to post a comment.'),
@@ -47,13 +48,11 @@ class _CommentsWidgetState extends State<CommentsWidget> {
     });
 
     try {
-      await _firestore.collection('comments').add({
-        'userId': userId,
-        'userName': userName, // Store user's display name
-        'commentText': commentText,
-        'timestamp':
-            FieldValue.serverTimestamp(), // Use server timestamp for consistency
-      });
+      locate<CommentsService>().addComment(
+        commentText,
+        userName,
+        widget.imageId,
+      );
 
       _commentController.clear(); // Clear the text field after posting
       if (mounted) {
@@ -97,15 +96,9 @@ class _CommentsWidgetState extends State<CommentsWidget> {
         const SizedBox(height: 20),
         Expanded(
           // StreamBuilder listens for real-time updates from Firestore
-          child: StreamBuilder<QuerySnapshot>(
+          child: StreamBuilder<List<Comment>>(
             stream:
-                _firestore
-                    .collection('comments')
-                    .orderBy(
-                      'timestamp',
-                      descending: true,
-                    ) // Order comments by most recent
-                    .snapshots(),
+                locate<CommentsService>().getComments(), // Stream of comments
             builder: (context, snapshot) {
               if (snapshot.hasError) {
                 return Center(child: Text('Error: ${snapshot.error}'));
@@ -115,31 +108,25 @@ class _CommentsWidgetState extends State<CommentsWidget> {
                 return const Center(child: CircularProgressIndicator());
               }
 
-              if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
+              if (!snapshot.hasData || snapshot.data!.isEmpty) {
                 return const Center(
                   child: Text('No comments yet. Be the first to comment!'),
                 );
               }
 
+              List<Comment> comments = snapshot.data!;
+
               // Display comments in a ListView
               return ListView.builder(
                 reverse: true, // Show most recent comments at the bottom
                 padding: const EdgeInsets.all(16.0),
-                itemCount: snapshot.data!.docs.length,
+                itemCount: comments.length,
                 itemBuilder: (context, index) {
-                  final DocumentSnapshot doc = snapshot.data!.docs[index];
-                  final Map<String, dynamic> data =
-                      doc.data() as Map<String, dynamic>;
-
-                  final String userName = data['userName'] ?? 'Anonymous';
-                  final String commentText =
-                      data['commentText'] ?? 'No comment text';
-                  final Timestamp? timestamp = data['timestamp'] as Timestamp?;
-
                   // Format timestamp for display
                   String timeAgo = '';
-                  if (timestamp != null) {
-                    final DateTime dateTime = timestamp.toDate();
+                  if (comments[index].timestamp != null) {
+                    final DateTime dateTime =
+                        comments[index].timestamp!.toDate();
                     final Duration difference = DateTime.now().difference(
                       dateTime,
                     );
@@ -174,7 +161,7 @@ class _CommentsWidgetState extends State<CommentsWidget> {
                               ),
                               const SizedBox(width: 8),
                               Text(
-                                userName,
+                                comments[index].userName,
                                 style: const TextStyle(
                                   fontWeight: FontWeight.bold,
                                   fontSize: 16,
@@ -192,7 +179,7 @@ class _CommentsWidgetState extends State<CommentsWidget> {
                           ),
                           const SizedBox(height: 8),
                           Text(
-                            commentText,
+                            comments[index].commentText,
                             style: const TextStyle(fontSize: 15),
                           ),
                         ],

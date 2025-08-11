@@ -76,7 +76,7 @@ class _HomeScreenState extends State<HomeScreen> {
               ),
             ),
           ),
-          back: CardBack(),
+          back: CardBack(fileName: fileName),
         ),
       );
     }
