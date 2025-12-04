@@ -62,25 +62,34 @@ jobs:
         with:
           anthropic_api_key: ${{ secrets.ANTHROPIC_API_KEY }}
           github_token: ${{ secrets.GITHUB_TOKEN }}
-          # Review focus areas
-          focus_areas: |
+          prompt: |
+            REPO: ${{ github.repository }}
+            PR NUMBER: ${{ github.event.pull_request.number }}
+
+            Please review this Flutter/Dart pull request with focus on:
+
+            Review focus areas:
             - Check for potential bugs and logic errors
             - Verify proper error handling in async operations
             - Ensure Firestore operations are correctly implemented
             - Check for security vulnerabilities
             - Verify proper state management
             - Review performance implications
-          # Programming language context
-          language_context: |
-            This is a Flutter/Dart application using:
+
+            Context: This is a Flutter/Dart application using:
             - Firebase (Auth, Firestore, Storage)
             - flutter_card_swiper for UI
             - go_router for navigation
+            - cloudrun/read_firestore for Firestore access
+            - dart format for code formatting
+            - flutter analyze for static analysis
+            - flutter test for unit and widget tests
 
-            Pay special attention to:
-            - Index-based operations in HomeScreen
-            - Firestore write operations
-            - Firebase Authentication flows
+            Goals:
+            - Identify any code smells or anti-patterns.
+            - Suggest improvements for code readability and maintainability.
+
+            Provide constructive feedback and suggestions for improvement.
 
   build-android:
     name: Build Android APK
@@ -95,8 +104,8 @@ jobs:
       - name: Setup Flutter
         uses: subosito/flutter-action@v2
         with:
-          flutter-version: "3.24.0"
-          channel: "stable"
+          channel: stable
+          flutter-version-file: pubspec.yaml # path to pubspec.yaml
           cache: true
 
       - name: Install dependencies
@@ -124,8 +133,8 @@ jobs:
       - name: Setup Flutter
         uses: subosito/flutter-action@v2
         with:
-          flutter-version: "3.24.0"
-          channel: "stable"
+          channel: stable
+          flutter-version-file: pubspec.yaml # path to pubspec.yaml
           cache: true
 
       - name: Install dependencies
