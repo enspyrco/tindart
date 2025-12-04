@@ -1,3 +1,5 @@
+import 'dart:developer';
+
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
@@ -26,11 +28,11 @@ class _HomeScreenState extends State<HomeScreen> {
       _retrievingIds = true;
     });
 
-    DocumentSnapshot<Map<String, dynamic>> docIdsDoc =
-        await FirebaseFirestore.instance
-            .collection('doc-id-lists')
-            .doc('RMCevRY4dGpUTTcrltun')
-            .get();
+    DocumentSnapshot<Map<String, dynamic>> docIdsDoc = await FirebaseFirestore
+        .instance
+        .collection('doc-id-lists')
+        .doc('RMCevRY4dGpUTTcrltun')
+        .get();
 
     _docIds = List<String>.from(docIdsDoc['ids'] as List);
 
@@ -103,84 +105,83 @@ class _HomeScreenState extends State<HomeScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body:
-          (_retrievingIds || _retrievingUrls)
-              ? Center(child: CircularProgressIndicator())
-              : CardSwiper(
-                cardsCount: cards.length,
-                padding: const EdgeInsets.all(0),
-                allowedSwipeDirection: const AllowedSwipeDirection.symmetric(
-                  horizontal: true,
-                ),
-                cardBuilder:
-                    (context, index, percentThresholdX, percentThresholdY) =>
-                        cards[index],
-                onSwipe: (previousIndex, currentIndex, direction) async {
-                  if (currentIndex == 5) {
-                    _retrieveNextImages();
-                  } else {
-                    if (currentIndex != null &&
-                        currentIndex < _cardDocIds.length &&
-                        direction == CardSwiperDirection.left) {
-                      try {
-                        final docId = _cardDocIds[currentIndex];
-                        final userId = FirebaseAuth.instance.currentUser!.uid;
+      body: (_retrievingIds || _retrievingUrls)
+          ? Center(child: CircularProgressIndicator())
+          : CardSwiper(
+              cardsCount: cards.length,
+              padding: const EdgeInsets.all(0),
+              allowedSwipeDirection: const AllowedSwipeDirection.symmetric(
+                horizontal: true,
+              ),
+              cardBuilder:
+                  (context, index, percentThresholdX, percentThresholdY) =>
+                      cards[index],
+              onSwipe: (previousIndex, currentIndex, direction) async {
+                if (currentIndex == 5) {
+                  _retrieveNextImages();
+                } else {
+                  if (currentIndex != null &&
+                      currentIndex < _cardDocIds.length &&
+                      direction == CardSwiperDirection.left) {
+                    try {
+                      final docId = _cardDocIds[currentIndex];
+                      final userId = FirebaseAuth.instance.currentUser!.uid;
 
-                        await Future.wait([
-                          FirebaseFirestore.instance
-                              .collection('preferences')
-                              .doc(userId)
-                              .set({
-                                'disliked': FieldValue.arrayUnion([docId]),
-                                'timestamp': FieldValue.serverTimestamp(),
-                              }, SetOptions(merge: true)),
-                          FirebaseFirestore.instance
-                              .collection('image-docs')
-                              .doc(docId)
-                              .set({
-                                'disliked': FieldValue.arrayUnion([userId]),
-                              }, SetOptions(merge: true)),
-                        ]);
-                      } catch (e) {
-                        print('Error saving dislike: $e');
-                      }
-
-                      return true;
+                      await Future.wait([
+                        FirebaseFirestore.instance
+                            .collection('preferences')
+                            .doc(userId)
+                            .set({
+                          'disliked': FieldValue.arrayUnion([docId]),
+                          'timestamp': FieldValue.serverTimestamp(),
+                        }, SetOptions(merge: true)),
+                        FirebaseFirestore.instance
+                            .collection('image-docs')
+                            .doc(docId)
+                            .set({
+                          'disliked': FieldValue.arrayUnion([userId]),
+                        }, SetOptions(merge: true)),
+                      ]);
+                    } catch (e) {
+                      log('Error saving dislike: $e');
                     }
 
-                    if (currentIndex != null &&
-                        currentIndex < _cardDocIds.length &&
-                        direction == CardSwiperDirection.right) {
-                      try {
-                        final docId = _cardDocIds[currentIndex];
-                        final userId = FirebaseAuth.instance.currentUser!.uid;
-
-                        await Future.wait([
-                          FirebaseFirestore.instance
-                              .collection('preferences')
-                              .doc(userId)
-                              .set({
-                                'liked': FieldValue.arrayUnion([docId]),
-                                'timestamp': FieldValue.serverTimestamp(),
-                              }, SetOptions(merge: true)),
-                          FirebaseFirestore.instance
-                              .collection('image-docs')
-                              .doc(docId)
-                              .set({
-                                'liked': FieldValue.arrayUnion([userId]),
-                              }, SetOptions(merge: true)),
-                        ]);
-                      } catch (e) {
-                        print('Error saving like: $e');
-                      }
-
-                      return true;
-                    }
+                    return true;
                   }
 
-                  return false;
-                },
-              ),
+                  if (currentIndex != null &&
+                      currentIndex < _cardDocIds.length &&
+                      direction == CardSwiperDirection.right) {
+                    try {
+                      final docId = _cardDocIds[currentIndex];
+                      final userId = FirebaseAuth.instance.currentUser!.uid;
+
+                      await Future.wait([
+                        FirebaseFirestore.instance
+                            .collection('preferences')
+                            .doc(userId)
+                            .set({
+                          'liked': FieldValue.arrayUnion([docId]),
+                          'timestamp': FieldValue.serverTimestamp(),
+                        }, SetOptions(merge: true)),
+                        FirebaseFirestore.instance
+                            .collection('image-docs')
+                            .doc(docId)
+                            .set({
+                          'liked': FieldValue.arrayUnion([userId]),
+                        }, SetOptions(merge: true)),
+                      ]);
+                    } catch (e) {
+                      log('Error saving like: $e');
+                    }
+
+                    return true;
+                  }
+                }
+
+                return false;
+              },
+            ),
     );
   }
 }

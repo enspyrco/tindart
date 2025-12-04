@@ -1,3 +1,5 @@
+import 'dart:developer';
+
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
@@ -66,14 +68,14 @@ class _CommentsWidgetState extends State<CommentsWidget> {
           SnackBar(content: Text('Failed to post comment: ${e.message}')),
         );
       }
-      print('Firebase Error posting comment: ${e.code} - ${e.message}');
+      log('Firebase Error posting comment: ${e.code} - ${e.message}');
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text('An unexpected error occurred: $e')),
         );
       }
-      print('Generic Error posting comment: $e');
+      log('Generic Error posting comment: $e');
     } finally {
       if (mounted) {
         setState(() {
@@ -221,11 +223,11 @@ class _CommentsWidgetState extends State<CommentsWidget> {
               _isPostingComment
                   ? const CircularProgressIndicator()
                   : FloatingActionButton(
-                    onPressed: _addComment,
-                    mini: true,
-                    backgroundColor: Theme.of(context).primaryColor,
-                    child: const Icon(Icons.send, color: Colors.white),
-                  ),
+                      onPressed: _addComment,
+                      mini: true,
+                      backgroundColor: Theme.of(context).primaryColor,
+                      child: const Icon(Icons.send, color: Colors.white),
+                    ),
             ],
           ),
         ),

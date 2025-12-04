@@ -11,8 +11,8 @@ class AuthService {
   AuthService({
     required FirebaseAuth auth,
     required FirebaseFirestore firestore,
-  }) : _auth = auth,
-       _firestore = firestore {
+  })  : _auth = auth,
+        _firestore = firestore {
     // When a User object is emitted by the FirebaseAuth's onAuthStateChanges
     // stream we create a subscription to the firestore, which is cancelled on
     // sign out to avoid listening to the firestore while signed out.
@@ -26,13 +26,12 @@ class AuthService {
             .doc('profiles/${user.uid}')
             .snapshots()
             .map<Map<String, Object?>?>((ref) {
-              return ref.data();
-            })
-            .listen((profile) {
-              if (profile != null) {
-                _userSubject.add(profile);
-              }
-            });
+          return ref.data();
+        }).listen((profile) {
+          if (profile != null) {
+            _userSubject.add(profile);
+          }
+        });
       }
     });
   }

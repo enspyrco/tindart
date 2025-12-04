@@ -20,13 +20,12 @@ import 'package:flutter_test/flutter_test.dart';
 
 void main() {
   group('HomeScreen Like/Dislike Saving', () {
-
     test('Index mapping logic verification', () {
       // Simulate the scenario that was causing the bug
 
       // Global doc IDs list (all available images)
       final allDocIds = [
-        'img1', 'img2', 'img3', 'img4', 'img5',  // Batch 1
+        'img1', 'img2', 'img3', 'img4', 'img5', // Batch 1
         'img6', 'img7', 'img8', 'img9', 'img10', // Batch 2
         'img11', 'img12', 'img13', 'img14', 'img15', // Batch 3
       ];
@@ -55,13 +54,15 @@ void main() {
       expect(correctDocId, 'img8', reason: 'Should save img8 from batch 2');
       expect(savedDocId, isNot(correctDocId), reason: 'BUG: Wrong ID is saved');
 
-
       // NEW APPROACH (fixed): Using batch-specific list
       // ================================================
       globalIndex = 0;
 
       // Batch 1
-      List<String> currentBatchDocIds = allDocIds.sublist(globalIndex, globalIndex + 5);
+      List<String> currentBatchDocIds = allDocIds.sublist(
+        globalIndex,
+        globalIndex + 5,
+      );
 
       cardIndex = 2;
       savedDocId = currentBatchDocIds[cardIndex]; // Uses batch-specific list
@@ -96,7 +97,11 @@ void main() {
       // Invalid index (would crash without bounds check)
       cardIndex = 5;
       isValid = cardIndex < currentBatchDocIds.length;
-      expect(isValid, false, reason: 'Index 5 is out of bounds, should not process');
+      expect(
+        isValid,
+        false,
+        reason: 'Index 5 is out of bounds, should not process',
+      );
     });
   });
 
