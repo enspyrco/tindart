@@ -152,6 +152,11 @@ jobs:
       - name: Install dependencies
         run: flutter pub get
 
+      - name: Install flutterfire CLI
+        run: |
+          dart pub global activate flutterfire_cli
+          echo "$HOME/.pub-cache/bin" >> $GITHUB_PATH
+
       - name: Setup CocoaPods
         run: |
           export LANG=en_US.UTF-8
