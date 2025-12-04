@@ -149,7 +149,7 @@ Edit `.github/workflows/ci.yml` to:
 if: github.event_name == 'pull_request' && github.event.pull_request.draft == false
 ```
 
-2. **Only review specific files:**
+1. **Only review specific files:**
 
 ```yaml
 on:
@@ -159,7 +159,7 @@ on:
       - "test/**/*.dart"
 ```
 
-3. **Limit review scope:**
+1. **Limit review scope:**
 
 ```yaml
 with:
