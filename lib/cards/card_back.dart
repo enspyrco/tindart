@@ -3,6 +3,7 @@ import 'dart:io';
 import 'package:async_wallpaper/async_wallpaper.dart';
 import 'package:cloud_functions/cloud_functions.dart';
 import 'package:flutter/material.dart';
+import 'package:gal/gal.dart';
 import 'package:go_router/go_router.dart';
 import 'package:http/http.dart' as http;
 import 'package:path_provider/path_provider.dart';
@@ -99,41 +100,123 @@ class _CardBackState extends State<CardBack> {
   }
 
   Future<void> _showWallpaperConfirmation(BuildContext context) async {
-    final result = await showDialog<String>(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('Set as Wallpaper'),
-        icon: const Icon(Icons.wallpaper, color: Colors.blue, size: 40),
-        content: const Text('Where would you like to set this image?'),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: const Text('Cancel'),
-          ),
-          ElevatedButton(
-            onPressed: () => Navigator.pop(context, 'home'),
-            child: const Text('Home Screen'),
-          ),
-          ElevatedButton(
-            onPressed: () => Navigator.pop(context, 'lock'),
-            child: const Text('Lock Screen'),
-          ),
-          ElevatedButton(
-            onPressed: () => Navigator.pop(context, 'both'),
-            child: const Text('Both'),
-          ),
-        ],
-      ),
-    );
+    if (Platform.isIOS) {
+      // iOS: Save to Photos and show instructions
+      await _saveToPhotosForWallpaper();
+    } else {
+      // Android: Show wallpaper location picker
+      final result = await showDialog<String>(
+        context: context,
+        builder: (context) => AlertDialog(
+          title: const Text('Set as Wallpaper'),
+          icon: const Icon(Icons.wallpaper, color: Colors.blue, size: 40),
+          content: const Text('Where would you like to set this image?'),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(context),
+              child: const Text('Cancel'),
+            ),
+            ElevatedButton(
+              onPressed: () => Navigator.pop(context, 'home'),
+              child: const Text('Home Screen'),
+            ),
+            ElevatedButton(
+              onPressed: () => Navigator.pop(context, 'lock'),
+              child: const Text('Lock Screen'),
+            ),
+            ElevatedButton(
+              onPressed: () => Navigator.pop(context, 'both'),
+              child: const Text('Both'),
+            ),
+          ],
+        ),
+      );
 
-    if (result != null) {
-      await _setWallpaper(result);
+      if (result != null) {
+        await _setWallpaperAndroid(result);
+      }
     }
   }
 
-  Future<void> _setWallpaper(String type) async {
+  Future<void> _saveToPhotosForWallpaper() async {
     try {
-      // Show loading indicator
+      setState(() {
+        _settingWallpaper = true;
+      });
+
+      // Check for permission
+      final hasAccess = await Gal.hasAccess(toAlbum: true);
+      if (!hasAccess) {
+        final granted = await Gal.requestAccess(toAlbum: true);
+        if (!granted) {
+          throw Exception('Permission denied to save to Photos');
+        }
+      }
+
+      // Download the image
+      final imageUrl =
+          'https://storage.googleapis.com/tindart-8c83b.firebasestorage.app/${widget.fileName}';
+      final response = await http.get(Uri.parse(imageUrl));
+      if (response.statusCode != 200) {
+        throw Exception('Failed to download image');
+      }
+
+      // Save to temporary file first
+      final tempDir = await getTemporaryDirectory();
+      final file = File('${tempDir.path}/tindart_wallpaper.jpg');
+      await file.writeAsBytes(response.bodyBytes);
+
+      // Save to Photos library
+      await Gal.putImage(file.path, album: 'TindArt');
+
+      // Clean up temp file
+      await file.delete();
+
+      setState(() {
+        _settingWallpaper = false;
+      });
+
+      if (mounted) {
+        showDialog(
+          context: context,
+          builder: (context) => AlertDialog(
+            title: const Text('Saved to Photos'),
+            icon: const Icon(Icons.check_circle, color: Colors.green, size: 40),
+            content: const Text(
+              'The image has been saved to your Photos library in the "TindArt" album.\n\n'
+              'To set as wallpaper:\n'
+              '1. Open the Photos app\n'
+              '2. Find the image in the TindArt album\n'
+              '3. Tap the share button\n'
+              '4. Select "Use as Wallpaper"',
+            ),
+            actions: [
+              ElevatedButton(
+                onPressed: () => Navigator.pop(context),
+                child: const Text('Got it'),
+              ),
+            ],
+          ),
+        );
+      }
+    } catch (e) {
+      setState(() {
+        _settingWallpaper = false;
+      });
+
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Error: ${e.toString()}'),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
+    }
+  }
+
+  Future<void> _setWallpaperAndroid(String type) async {
+    try {
       setState(() {
         _settingWallpaper = true;
       });
