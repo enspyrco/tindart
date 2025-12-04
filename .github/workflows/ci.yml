@@ -27,6 +27,9 @@ jobs:
       - name: Install dependencies
         run: flutter pub get
 
+      - name: Install cloudrun/read_firestore dependencies
+        run: cd cloudrun/read_firestore && dart pub get
+
       - name: Verify formatting
         run: dart format --set-exit-if-changed .
 
