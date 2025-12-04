@@ -20,7 +20,7 @@ jobs:
         with:
           channel: stable
           flutter-version-file: pubspec.yaml # path to pubspec.yaml
-          cache: false
+          cache: true
 
       - run: flutter --version
 
