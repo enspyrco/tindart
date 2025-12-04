@@ -41,8 +41,7 @@ Future<List<List<String>>> createPreferenceMatrix(
   Document idListDoc,
 ) async {
   // 1. Extract row and column headings
-  final rowHeadings =
-      idListDoc.fields?['ids']?.arrayValue?.values
+  final rowHeadings = idListDoc.fields?['ids']?.arrayValue?.values
           ?.map((v) => v.stringValue ?? '')
           .where((id) => id.isNotEmpty)
           .toList() ??
@@ -60,15 +59,13 @@ Future<List<List<String>>> createPreferenceMatrix(
   for (var col = 0; col < columnHeadings.length; col++) {
     final prefDoc = preferences[columnHeadings[col]]!;
 
-    final liked =
-        prefDoc.fields?['liked']?.arrayValue?.values
+    final liked = prefDoc.fields?['liked']?.arrayValue?.values
             ?.map((v) => v.stringValue ?? '')
             .where((id) => id.isNotEmpty)
             .toList() ??
         [];
 
-    final disliked =
-        prefDoc.fields?['disliked']?.arrayValue?.values
+    final disliked = prefDoc.fields?['disliked']?.arrayValue?.values
             ?.map((v) => v.stringValue ?? '')
             .where((id) => id.isNotEmpty)
             .toList() ??
@@ -87,8 +84,8 @@ Future<List<List<String>>> createPreferenceMatrix(
   final matrixWithHeaders = [
     [''] + columnHeadings, // First row: empty + column headings
     ...matrix.asMap().entries.map(
-      (entry) => [rowHeadings[entry.key]] + entry.value,
-    ),
+          (entry) => [rowHeadings[entry.key]] + entry.value,
+        ),
   ];
 
   return matrixWithHeaders;
