@@ -1,3 +1,5 @@
+import 'dart:developer';
+
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
@@ -141,7 +143,7 @@ class _HomeScreenState extends State<HomeScreen> {
                         }, SetOptions(merge: true)),
                       ]);
                     } catch (e) {
-                      print('Error saving dislike: $e');
+                      log('Error saving dislike: $e');
                     }
 
                     return true;
@@ -170,7 +172,7 @@ class _HomeScreenState extends State<HomeScreen> {
                         }, SetOptions(merge: true)),
                       ]);
                     } catch (e) {
-                      print('Error saving like: $e');
+                      log('Error saving like: $e');
                     }
 
                     return true;
