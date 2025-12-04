@@ -23,15 +23,12 @@ class Locator {
     var object = _objectOfType[T] as T?;
 
     if (object == null) {
-      String typeKeys =
-          _objectOfType.isEmpty
-              ? 'No objects have been added to the Locator yet.'
-              : 'Only the following types have been added: \n  - ${_objectOfType.keys.join('\n  - ')}.';
+      String typeKeys = _objectOfType.isEmpty
+          ? 'No objects have been added to the Locator yet.'
+          : 'Only the following types have been added: \n  - ${_objectOfType.keys.join('\n  - ')}.';
 
-      var finalFrame = StackTrace.current
-          .toString()
-          .split('\n')[1]
-          .substring(7);
+      var finalFrame =
+          StackTrace.current.toString().split('\n')[1].substring(7);
 
       throw 'You attempted to locate an object with type: `$T`\n\n'
           '$typeKeys\n\n'

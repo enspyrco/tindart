@@ -32,41 +32,40 @@ class _CardBackState extends State<CardBack> {
     final confirmed = await showDialog<bool>(
       context: context,
       barrierDismissible: false, // User must tap a button to close
-      builder:
-          (context) => AlertDialog(
-            title: const Text('Delete All Data?'),
-            icon: const Icon(Icons.warning, color: Colors.red, size: 40),
-            content: const Column(
-              mainAxisSize: MainAxisSize.min,
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text('This action will permanently:'),
-                SizedBox(height: 8),
-                Text('• Delete all user data'),
-                Text('• Remove all account information'),
-                Text('• Clear all app preferences'),
-                SizedBox(height: 16),
-                Text(
-                  'This action cannot be undone.',
-                  style: TextStyle(fontWeight: FontWeight.bold),
-                ),
-              ],
+      builder: (context) => AlertDialog(
+        title: const Text('Delete All Data?'),
+        icon: const Icon(Icons.warning, color: Colors.red, size: 40),
+        content: const Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text('This action will permanently:'),
+            SizedBox(height: 8),
+            Text('• Delete all user data'),
+            Text('• Remove all account information'),
+            Text('• Clear all app preferences'),
+            SizedBox(height: 16),
+            Text(
+              'This action cannot be undone.',
+              style: TextStyle(fontWeight: FontWeight.bold),
             ),
-            actions: [
-              TextButton(
-                onPressed: () => Navigator.pop(context, false),
-                child: const Text('Cancel'),
-              ),
-              ElevatedButton(
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.red,
-                  foregroundColor: Colors.white,
-                ),
-                onPressed: () => Navigator.pop(context, true),
-                child: const Text('Delete Permanently'),
-              ),
-            ],
+          ],
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context, false),
+            child: const Text('Cancel'),
           ),
+          ElevatedButton(
+            style: ElevatedButton.styleFrom(
+              backgroundColor: Colors.red,
+              foregroundColor: Colors.white,
+            ),
+            onPressed: () => Navigator.pop(context, true),
+            child: const Text('Delete Permanently'),
+          ),
+        ],
+      ),
     );
 
     if (confirmed == true) {
@@ -82,10 +81,9 @@ class _CardBackState extends State<CardBack> {
     setState(() {
       _deleting = true;
     });
-    final _ =
-        await FirebaseFunctions.instance
-            .httpsCallable('deleteUserAccount')
-            .call();
+    final _ = await FirebaseFunctions.instance
+        .httpsCallable('deleteUserAccount')
+        .call();
     setState(() {
       _deleting = false;
     });
@@ -111,29 +109,27 @@ class _CardBackState extends State<CardBack> {
                 context.push('/profile');
               }
             },
-            itemBuilder:
-                (BuildContext context) => [
-                  const PopupMenuItem<String>(
-                    value: 'SignOut',
-                    child: Text('Sign Out'),
-                  ),
-                  const PopupMenuItem<String>(
-                    value: 'Delete',
-                    child: Text('Delete Account'),
-                  ),
-                  const PopupMenuItem<String>(
-                    value: 'Profile',
-                    child: Text('Profile'),
-                  ),
-                ],
+            itemBuilder: (BuildContext context) => [
+              const PopupMenuItem<String>(
+                value: 'SignOut',
+                child: Text('Sign Out'),
+              ),
+              const PopupMenuItem<String>(
+                value: 'Delete',
+                child: Text('Delete Account'),
+              ),
+              const PopupMenuItem<String>(
+                value: 'Profile',
+                child: Text('Profile'),
+              ),
+            ],
           ),
         ],
       ),
       body: Center(
-        child:
-            _deleting
-                ? CircularProgressIndicator()
-                : CommentsWidget(imageId: widget.fileName),
+        child: _deleting
+            ? CircularProgressIndicator()
+            : CommentsWidget(imageId: widget.fileName),
       ),
     );
   }

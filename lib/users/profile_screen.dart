@@ -147,8 +147,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
   Widget build(BuildContext context) {
     // Determine if the save button should be enabled
     // It should be enabled if not loading AND the text field is not empty AND the text has changed from initial
-    final bool isSaveButtonEnabled =
-        !_isLoading &&
+    final bool isSaveButtonEnabled = !_isLoading &&
         _usernameController.text.trim().isNotEmpty &&
         _usernameController.text.trim() != _initialUsername;
 
@@ -200,20 +199,19 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   borderRadius: BorderRadius.circular(10),
                 ),
               ),
-              child:
-                  _isLoading
-                      ? const SizedBox(
-                        width: 24,
-                        height: 24,
-                        child: CircularProgressIndicator(
-                          color: Colors.white,
-                          strokeWidth: 2,
-                        ),
-                      )
-                      : const Text(
-                        'Save Username',
-                        style: TextStyle(fontSize: 18),
+              child: _isLoading
+                  ? const SizedBox(
+                      width: 24,
+                      height: 24,
+                      child: CircularProgressIndicator(
+                        color: Colors.white,
+                        strokeWidth: 2,
                       ),
+                    )
+                  : const Text(
+                      'Save Username',
+                      style: TextStyle(fontSize: 18),
+                    ),
             ),
             const SizedBox(height: 30),
             FutureBuilder(

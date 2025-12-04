@@ -221,11 +221,11 @@ class _CommentsWidgetState extends State<CommentsWidget> {
               _isPostingComment
                   ? const CircularProgressIndicator()
                   : FloatingActionButton(
-                    onPressed: _addComment,
-                    mini: true,
-                    backgroundColor: Theme.of(context).primaryColor,
-                    child: const Icon(Icons.send, color: Colors.white),
-                  ),
+                      onPressed: _addComment,
+                      mini: true,
+                      backgroundColor: Theme.of(context).primaryColor,
+                      child: const Icon(Icons.send, color: Colors.white),
+                    ),
             ],
           ),
         ),

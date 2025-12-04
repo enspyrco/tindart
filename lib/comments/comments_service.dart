@@ -6,8 +6,8 @@ class CommentsService {
   CommentsService({
     required FirebaseAuth auth,
     required FirebaseFirestore firestore,
-  }) : _auth = auth,
-       _firestore = firestore;
+  })  : _auth = auth,
+        _firestore = firestore;
 
   final FirebaseAuth _auth;
   final FirebaseFirestore _firestore;
@@ -32,18 +32,17 @@ class CommentsService {
         .orderBy('timestamp', descending: true) // Order comments by most recent
         .snapshots()
         .map<List<Comment>>((querySnapshot) {
-          final List<Comment> comments = [];
-          for (final queryDocumentSnapshot in querySnapshot.docs) {
-            final String userName =
-                queryDocumentSnapshot['userName'] ?? 'Anonymous';
-            final String commentText =
-                queryDocumentSnapshot['commentText'] ?? 'No comment text';
-            final Timestamp? doc =
-                queryDocumentSnapshot['timestamp'] as Timestamp?;
+      final List<Comment> comments = [];
+      for (final queryDocumentSnapshot in querySnapshot.docs) {
+        final String userName =
+            queryDocumentSnapshot['userName'] ?? 'Anonymous';
+        final String commentText =
+            queryDocumentSnapshot['commentText'] ?? 'No comment text';
+        final Timestamp? doc = queryDocumentSnapshot['timestamp'] as Timestamp?;
 
-            comments.add(Comment(userName, commentText, doc));
-          }
-          return comments;
-        });
+        comments.add(Comment(userName, commentText, doc));
+      }
+      return comments;
+    });
   }
 }

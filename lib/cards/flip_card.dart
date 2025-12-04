@@ -60,10 +60,9 @@ class _FlipCardState extends State<FlipCard>
           final angle =
               _isFront ? _animation.value * pi : (1 - _animation.value) * pi;
           return Transform(
-            transform:
-                Matrix4.identity()
-                  ..setEntry(3, 2, 0.001) // Perspective
-                  ..rotateY(angle),
+            transform: Matrix4.identity()
+              ..setEntry(3, 2, 0.001) // Perspective
+              ..rotateY(angle),
             alignment: Alignment.center,
             child: _isFront ? widget.front : widget.back,
           );

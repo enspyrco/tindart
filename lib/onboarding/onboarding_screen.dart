@@ -63,11 +63,9 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
     final name = _nameController.text.trim();
 
     try {
-      await FirebaseFirestore.instance
-          .collection('profiles')
-          .doc(userId)
-          .set({'name': name}, SetOptions(merge: true))
-          .timeout(const Duration(seconds: 5));
+      await FirebaseFirestore.instance.collection('profiles').doc(userId).set(
+          {'name': name},
+          SetOptions(merge: true)).timeout(const Duration(seconds: 5));
 
       if (!context.mounted) return false;
 
@@ -167,10 +165,9 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                           child: RichText(
                             text: TextSpan(
                               style: TextStyle(
-                                color:
-                                    Theme.of(
-                                      context,
-                                    ).textTheme.bodyMedium?.color,
+                                color: Theme.of(
+                                  context,
+                                ).textTheme.bodyMedium?.color,
                                 fontSize: 16.0,
                               ),
                               children: [
@@ -181,11 +178,10 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                                     color: Colors.blue,
                                     decoration: TextDecoration.underline,
                                   ),
-                                  recognizer:
-                                      TapGestureRecognizer()
-                                        ..onTap = () {
-                                          context.push('/privacy-policy');
-                                        },
+                                  recognizer: TapGestureRecognizer()
+                                    ..onTap = () {
+                                      context.push('/privacy-policy');
+                                    },
                                 ),
                                 const TextSpan(
                                   text: ' and confirm that I have read it.',
@@ -207,39 +203,38 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
               bottom: 24.0,
               child: ElevatedButton(
                 // Button is enabled only if _isChecked is true AND _nameController is not empty AND not currently saving
-                onPressed:
-                    (isButtonEnabled && !_isSaving)
-                        ? () async {
-                          setState(() {
-                            _isSaving = true; // Start showing loading indicator
+                onPressed: (isButtonEnabled && !_isSaving)
+                    ? () async {
+                        setState(() {
+                          _isSaving = true; // Start showing loading indicator
+                        });
+
+                        // Attempt to save the profile name to Firestore
+                        final bool saveSuccess = await _saveProfile(context);
+
+                        setState(() {
+                          _isSaving =
+                              false; // Stop showing loading indicator, re-enable button
+                        });
+
+                        // Only proceed with onboarding completion and navigation if save was successful
+                        if (saveSuccess) {
+                          SharedPreferences.getInstance().then((prefs) {
+                            prefs.setBool('onboarded', true);
                           });
 
-                          // Attempt to save the profile name to Firestore
-                          final bool saveSuccess = await _saveProfile(context);
+                          if (!context.mounted) return;
 
-                          setState(() {
-                            _isSaving =
-                                false; // Stop showing loading indicator, re-enable button
-                          });
-
-                          // Only proceed with onboarding completion and navigation if save was successful
-                          if (saveSuccess) {
-                            SharedPreferences.getInstance().then((prefs) {
-                              prefs.setBool('onboarded', true);
-                            });
-
-                            if (!context.mounted) return;
-
-                            if (locate<AuthService>().currentUserId == null) {
-                              context.go('/signin');
-                            } else {
-                              context.go('/');
-                            }
+                          if (locate<AuthService>().currentUserId == null) {
+                            context.go('/signin');
+                          } else {
+                            context.go('/');
                           }
-                          // If saveSuccess is false, _saveProfile already showed an error message,
-                          // so no further action is needed here, and navigation will not occur.
                         }
-                        : null, // Button is disabled if conditions are not met or if saving
+                        // If saveSuccess is false, _saveProfile already showed an error message,
+                        // so no further action is needed here, and navigation will not occur.
+                      }
+                    : null, // Button is disabled if conditions are not met or if saving
                 style: ElevatedButton.styleFrom(
                   padding: const EdgeInsets.symmetric(
                     horizontal: 30,
@@ -249,17 +244,16 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                     borderRadius: BorderRadius.circular(10),
                   ),
                 ),
-                child:
-                    _isSaving
-                        ? const SizedBox(
-                          width: 24,
-                          height: 24,
-                          child: CircularProgressIndicator(
-                            color: Colors.white,
-                            strokeWidth: 2,
-                          ),
-                        )
-                        : const Text('Done', style: TextStyle(fontSize: 18)),
+                child: _isSaving
+                    ? const SizedBox(
+                        width: 24,
+                        height: 24,
+                        child: CircularProgressIndicator(
+                          color: Colors.white,
+                          strokeWidth: 2,
+                        ),
+                      )
+                    : const Text('Done', style: TextStyle(fontSize: 18)),
               ),
             ),
           ],
