@@ -1,10 +1,21 @@
+import 'dart:io';
+
+import 'package:async_wallpaper/async_wallpaper.dart';
 import 'package:cloud_functions/cloud_functions.dart';
 import 'package:flutter/material.dart';
+import 'package:gal/gal.dart';
 import 'package:go_router/go_router.dart';
+import 'package:http/http.dart' as http;
+import 'package:path_provider/path_provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:tindart/auth/auth_service.dart';
 import 'package:tindart/comments/comments_widget.dart';
 import 'package:tindart/utils/locator.dart';
+
+const _storageBaseUrl =
+    'https://storage.googleapis.com/tindart-8c83b.firebasestorage.app';
+
+enum _MenuAction { signOut, deleteAccount, profile, setWallpaper }
 
 class CardBack extends StatefulWidget {
   const CardBack({required this.fileName, super.key});
@@ -17,6 +28,7 @@ class CardBack extends StatefulWidget {
 
 class _CardBackState extends State<CardBack> {
   bool _deleting = false;
+  bool _settingWallpaper = false;
 
   Future<void> _signOut() async {
     // SharedPreferences.getInstance().then((prefs) {
@@ -92,44 +104,236 @@ class _CardBackState extends State<CardBack> {
     }
   }
 
+  /// Downloads the image to a temporary file and returns it.
+  /// Caller is responsible for deleting the file when done.
+  Future<File> _downloadImageToTempFile() async {
+    final imageUrl = '$_storageBaseUrl/${widget.fileName}';
+    final response = await http.get(Uri.parse(imageUrl));
+    if (response.statusCode != 200) {
+      throw Exception(
+        'Failed to download image (HTTP ${response.statusCode})',
+      );
+    }
+    final tempDir = await getTemporaryDirectory();
+    final file = File('${tempDir.path}/tindart_wallpaper_temp.jpg');
+    await file.writeAsBytes(response.bodyBytes);
+    return file;
+  }
+
+  Future<void> _showWallpaperConfirmation(BuildContext context) async {
+    if (Platform.isIOS) {
+      // iOS: Save to Photos and show instructions
+      await _saveToPhotosForWallpaper();
+    } else {
+      // Android: Show wallpaper location picker
+      final result = await showDialog<String>(
+        context: context,
+        builder: (context) => AlertDialog(
+          title: const Text('Set as Wallpaper'),
+          icon: const Icon(Icons.wallpaper, color: Colors.blue, size: 40),
+          content: const Text('Where would you like to set this image?'),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(context),
+              child: const Text('Cancel'),
+            ),
+            ElevatedButton(
+              onPressed: () => Navigator.pop(context, 'home'),
+              child: const Text('Home Screen'),
+            ),
+            ElevatedButton(
+              onPressed: () => Navigator.pop(context, 'lock'),
+              child: const Text('Lock Screen'),
+            ),
+            ElevatedButton(
+              onPressed: () => Navigator.pop(context, 'both'),
+              child: const Text('Both'),
+            ),
+          ],
+        ),
+      );
+
+      if (result != null) {
+        await _setWallpaperAndroid(result);
+      }
+    }
+  }
+
+  Future<void> _saveToPhotosForWallpaper() async {
+    File? tempFile;
+    try {
+      setState(() {
+        _settingWallpaper = true;
+      });
+
+      // Check for permission
+      final hasAccess = await Gal.hasAccess(toAlbum: true);
+      if (!hasAccess) {
+        final granted = await Gal.requestAccess(toAlbum: true);
+        if (!granted) {
+          throw Exception('Permission denied to save to Photos');
+        }
+      }
+
+      // Download the image
+      tempFile = await _downloadImageToTempFile();
+
+      // Save to Photos library
+      await Gal.putImage(tempFile.path, album: 'TindArt');
+
+      if (mounted) {
+        showDialog(
+          context: context,
+          builder: (context) => AlertDialog(
+            title: const Text('Saved to Photos'),
+            icon: const Icon(Icons.check_circle, color: Colors.green, size: 40),
+            content: const Text(
+              'The image has been saved to your Photos library in the "TindArt" album.\n\n'
+              'To set as wallpaper:\n'
+              '1. Open the Photos app\n'
+              '2. Find the image in the TindArt album\n'
+              '3. Tap the share button\n'
+              '4. Select "Use as Wallpaper"',
+            ),
+            actions: [
+              ElevatedButton(
+                onPressed: () => Navigator.pop(context),
+                child: const Text('Got it'),
+              ),
+            ],
+          ),
+        );
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Error: ${e.toString()}'),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
+    } finally {
+      // Always clean up temp file
+      if (tempFile != null && await tempFile.exists()) {
+        await tempFile.delete();
+      }
+      setState(() {
+        _settingWallpaper = false;
+      });
+    }
+  }
+
+  Future<void> _setWallpaperAndroid(String type) async {
+    File? tempFile;
+    try {
+      setState(() {
+        _settingWallpaper = true;
+      });
+
+      // Download the image to temporary file
+      tempFile = await _downloadImageToTempFile();
+
+      // Set wallpaper based on user choice
+      final wallpaperLocation = switch (type) {
+        'home' => AsyncWallpaper.HOME_SCREEN,
+        'lock' => AsyncWallpaper.LOCK_SCREEN,
+        'both' => AsyncWallpaper.BOTH_SCREENS,
+        _ => throw Exception('Invalid wallpaper type: $type'),
+      };
+
+      final success = await AsyncWallpaper.setWallpaper(
+        url: tempFile.path,
+        wallpaperLocation: wallpaperLocation,
+      );
+
+      // Show result
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(success
+                ? 'Wallpaper set successfully!'
+                : 'Failed to set wallpaper'),
+            backgroundColor: success ? Colors.green : Colors.red,
+          ),
+        );
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Error: ${e.toString()}'),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
+    } finally {
+      // Always clean up temp file
+      if (tempFile != null && await tempFile.exists()) {
+        await tempFile.delete();
+      }
+      setState(() {
+        _settingWallpaper = false;
+      });
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
         title: const Text('TindArt'),
         actions: [
-          PopupMenuButton<String>(
+          PopupMenuButton<_MenuAction>(
             icon: const Icon(Icons.more_vert),
-            onSelected: (value) {
-              if (value == 'Delete' && !_deleting) {
-                _showDeleteConfirmation(context);
-              } else if (value == 'SignOut') {
-                _signOut();
-              } else if (value == 'Profile') {
-                context.push('/profile');
+            onSelected: (action) {
+              switch (action) {
+                case _MenuAction.signOut:
+                  _signOut();
+                case _MenuAction.deleteAccount:
+                  if (!_deleting) _showDeleteConfirmation(context);
+                case _MenuAction.profile:
+                  context.push('/profile');
+                case _MenuAction.setWallpaper:
+                  _showWallpaperConfirmation(context);
               }
             },
             itemBuilder: (BuildContext context) => [
-              const PopupMenuItem<String>(
-                value: 'SignOut',
+              const PopupMenuItem(
+                value: _MenuAction.signOut,
                 child: Text('Sign Out'),
               ),
-              const PopupMenuItem<String>(
-                value: 'Delete',
+              const PopupMenuItem(
+                value: _MenuAction.deleteAccount,
                 child: Text('Delete Account'),
               ),
-              const PopupMenuItem<String>(
-                value: 'Profile',
+              const PopupMenuItem(
+                value: _MenuAction.profile,
                 child: Text('Profile'),
+              ),
+              const PopupMenuItem(
+                value: _MenuAction.setWallpaper,
+                child: Row(
+                  children: [
+                    Icon(Icons.wallpaper, size: 20),
+                    SizedBox(width: 8),
+                    Text('Set as Wallpaper'),
+                  ],
+                ),
               ),
             ],
           ),
         ],
       ),
-      body: Center(
-        child: _deleting
-            ? CircularProgressIndicator()
-            : CommentsWidget(imageId: widget.fileName),
+      body: Stack(
+        children: [
+          Center(child: CommentsWidget(imageId: widget.fileName)),
+          if (_deleting || _settingWallpaper)
+            Container(
+              color: Colors.black54,
+              child: const Center(child: CircularProgressIndicator()),
+            ),
+        ],
       ),
     );
   }

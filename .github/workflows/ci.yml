@@ -50,6 +50,10 @@ jobs:
     name: Claude Code Review
     runs-on: ubuntu-latest
     if: github.event_name == 'pull_request'
+    permissions:
+      contents: read
+      pull-requests: write
+      issues: write
 
     steps:
       - name: Checkout code
@@ -62,34 +66,33 @@ jobs:
         with:
           anthropic_api_key: ${{ secrets.ANTHROPIC_API_KEY }}
           github_token: ${{ secrets.GITHUB_TOKEN }}
+          show_full_output: true
           prompt: |
             REPO: ${{ github.repository }}
             PR NUMBER: ${{ github.event.pull_request.number }}
 
             Please review this Flutter/Dart pull request with focus on:
+            - Code quality and best practices
+            - Potential bugs or logic errors
+            - Proper error handling in async operations
+            - Security vulnerabilities
+            - State management issues
+            - Performance implications
 
-            Review focus areas:
-            - Check for potential bugs and logic errors
-            - Verify proper error handling in async operations
-            - Ensure Firestore operations are correctly implemented
-            - Check for security vulnerabilities
-            - Verify proper state management
-            - Review performance implications
+            Context: This is a Flutter/Dart app using Firebase (Auth, Firestore, Storage),
+            flutter_card_swiper for UI, and go_router for navigation.
 
-            Context: This is a Flutter/Dart application using:
-            - Firebase (Auth, Firestore, Storage)
-            - flutter_card_swiper for UI
-            - go_router for navigation
-            - cloudrun/read_firestore for Firestore access
-            - dart format for code formatting
-            - flutter analyze for static analysis
-            - flutter test for unit and widget tests
+            After reviewing, submit a GitHub PR review using:
+            `gh pr review ${{ github.event.pull_request.number }} --approve --body "your review summary"`
+            or
+            `gh pr review ${{ github.event.pull_request.number }} --request-changes --body "your review summary"`
+            or
+            `gh pr review ${{ github.event.pull_request.number }} --comment --body "your review summary"`
 
-            Goals:
-            - Identify any code smells or anti-patterns.
-            - Suggest improvements for code readability and maintainability.
-
-            Provide constructive feedback and suggestions for improvement.
+            Choose --approve if the code looks good, --request-changes if there are issues that must be fixed,
+            or --comment for general feedback without approval status.
+          claude_args: |
+            --allowedTools "Bash(gh pr review:*),Bash(gh pr diff:*),Bash(gh pr view:*),Read,Glob,Grep"
 
   build-android:
     name: Build Android APK
@@ -126,12 +129,6 @@ jobs:
       - name: Build App Bundle (AAB)
         run: flutter build appbundle --release
 
-      # - name: Upload App Bundle (AAB)
-      #   uses: actions/upload-artifact@v4
-      #   with:
-      #     name: app-release-aab
-      #     path: build/app/outputs/bundle/release/app-release.aab
-
       - name: Deploy to Play Store
         uses: r0adkll/upload-google-play@v1
         with:
@@ -140,13 +137,6 @@ jobs:
           releaseFiles: build/app/outputs/bundle/release/app-release.aab
           track: production
           status: completed
-
-      # - name: Upload App Bundle (AAB) as artifact
-      #   if: always()
-      #   uses: actions/upload-artifact@v4
-      #   with:
-      #     name: app-release-aab
-      #     path: build/app/outputs/bundle/release/app-release.aab
 
   build-ios:
     name: Build iOS
