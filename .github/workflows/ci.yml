@@ -82,11 +82,17 @@ jobs:
             Context: This is a Flutter/Dart app using Firebase (Auth, Firestore, Storage),
             flutter_card_swiper for UI, and go_router for navigation.
 
-            Use `gh pr comment` for top-level feedback.
-            Use `mcp__github_inline_comment__create_inline_comment` to highlight specific code issues.
-            Only post GitHub comments - don't submit review text as messages.
+            After reviewing, submit a GitHub PR review using:
+            `gh pr review ${{ github.event.pull_request.number }} --approve --body "your review summary"`
+            or
+            `gh pr review ${{ github.event.pull_request.number }} --request-changes --body "your review summary"`
+            or
+            `gh pr review ${{ github.event.pull_request.number }} --comment --body "your review summary"`
+
+            Choose --approve if the code looks good, --request-changes if there are issues that must be fixed,
+            or --comment for general feedback without approval status.
           claude_args: |
-            --allowedTools "mcp__github_inline_comment__create_inline_comment,Bash(gh pr comment:*),Bash(gh pr diff:*),Bash(gh pr view:*)"
+            --allowedTools "Bash(gh pr review:*),Bash(gh pr diff:*),Bash(gh pr view:*),Read,Glob,Grep"
 
   build-android:
     name: Build Android APK
