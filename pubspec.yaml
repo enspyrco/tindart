@@ -8,7 +8,7 @@ environment:
   flutter: 3.38.3
 
 dependencies:
-  async_wallpaper: ^2.1.0
+  wallpaper_manager_plus: ^2.0.1
   gal: ^2.3.0
   cloud_firestore: ^5.6.6
   cloud_functions: ^5.5.0
