@@ -1,6 +1,6 @@
 import 'dart:io';
 
-import 'package:async_wallpaper/async_wallpaper.dart';
+import 'package:wallpaper_manager_plus/wallpaper_manager_plus.dart';
 import 'package:cloud_functions/cloud_functions.dart';
 import 'package:flutter/material.dart';
 import 'package:gal/gal.dart';
@@ -236,25 +236,23 @@ class _CardBackState extends State<CardBack> {
 
       // Set wallpaper based on user choice
       final wallpaperLocation = switch (type) {
-        'home' => AsyncWallpaper.HOME_SCREEN,
-        'lock' => AsyncWallpaper.LOCK_SCREEN,
-        'both' => AsyncWallpaper.BOTH_SCREENS,
+        'home' => WallpaperManagerPlus.homeScreen,
+        'lock' => WallpaperManagerPlus.lockScreen,
+        'both' => WallpaperManagerPlus.bothScreens,
         _ => throw Exception('Invalid wallpaper type: $type'),
       };
 
-      final success = await AsyncWallpaper.setWallpaper(
-        url: tempFile.path,
-        wallpaperLocation: wallpaperLocation,
+      await WallpaperManagerPlus().setWallpaper(
+        tempFile.path,
+        wallpaperLocation,
       );
 
-      // Show result
+      // Show success (throws on failure)
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(success
-                ? 'Wallpaper set successfully!'
-                : 'Failed to set wallpaper'),
-            backgroundColor: success ? Colors.green : Colors.red,
+          const SnackBar(
+            content: Text('Wallpaper set successfully!'),
+            backgroundColor: Colors.green,
           ),
         );
       }
