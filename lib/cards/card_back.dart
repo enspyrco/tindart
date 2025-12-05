@@ -15,6 +15,8 @@ import 'package:tindart/utils/locator.dart';
 const _storageBaseUrl =
     'https://storage.googleapis.com/tindart-8c83b.firebasestorage.app';
 
+enum _MenuAction { signOut, deleteAccount, profile, setWallpaper }
+
 class CardBack extends StatefulWidget {
   const CardBack({required this.fileName, super.key});
 
@@ -282,34 +284,35 @@ class _CardBackState extends State<CardBack> {
       appBar: AppBar(
         title: const Text('TindArt'),
         actions: [
-          PopupMenuButton<String>(
+          PopupMenuButton<_MenuAction>(
             icon: const Icon(Icons.more_vert),
-            onSelected: (value) {
-              if (value == 'Delete' && !_deleting) {
-                _showDeleteConfirmation(context);
-              } else if (value == 'SignOut') {
-                _signOut();
-              } else if (value == 'Profile') {
-                context.push('/profile');
-              } else if (value == 'SetWallpaper') {
-                _showWallpaperConfirmation(context);
+            onSelected: (action) {
+              switch (action) {
+                case _MenuAction.signOut:
+                  _signOut();
+                case _MenuAction.deleteAccount:
+                  if (!_deleting) _showDeleteConfirmation(context);
+                case _MenuAction.profile:
+                  context.push('/profile');
+                case _MenuAction.setWallpaper:
+                  _showWallpaperConfirmation(context);
               }
             },
             itemBuilder: (BuildContext context) => [
-              const PopupMenuItem<String>(
-                value: 'SignOut',
+              const PopupMenuItem(
+                value: _MenuAction.signOut,
                 child: Text('Sign Out'),
               ),
-              const PopupMenuItem<String>(
-                value: 'Delete',
+              const PopupMenuItem(
+                value: _MenuAction.deleteAccount,
                 child: Text('Delete Account'),
               ),
-              const PopupMenuItem<String>(
-                value: 'Profile',
+              const PopupMenuItem(
+                value: _MenuAction.profile,
                 child: Text('Profile'),
               ),
-              const PopupMenuItem<String>(
-                value: 'SetWallpaper',
+              const PopupMenuItem(
+                value: _MenuAction.setWallpaper,
                 child: Row(
                   children: [
                     Icon(Icons.wallpaper, size: 20),
@@ -322,10 +325,15 @@ class _CardBackState extends State<CardBack> {
           ),
         ],
       ),
-      body: Center(
-        child: (_deleting || _settingWallpaper)
-            ? CircularProgressIndicator()
-            : CommentsWidget(imageId: widget.fileName),
+      body: Stack(
+        children: [
+          Center(child: CommentsWidget(imageId: widget.fileName)),
+          if (_deleting || _settingWallpaper)
+            Container(
+              color: Colors.black54,
+              child: const Center(child: CircularProgressIndicator()),
+            ),
+        ],
       ),
     );
   }
