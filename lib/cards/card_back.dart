@@ -12,6 +12,9 @@ import 'package:tindart/auth/auth_service.dart';
 import 'package:tindart/comments/comments_widget.dart';
 import 'package:tindart/utils/locator.dart';
 
+const _storageBaseUrl =
+    'https://storage.googleapis.com/tindart-8c83b.firebasestorage.app';
+
 class CardBack extends StatefulWidget {
   const CardBack({required this.fileName, super.key});
 
@@ -99,6 +102,22 @@ class _CardBackState extends State<CardBack> {
     }
   }
 
+  /// Downloads the image to a temporary file and returns it.
+  /// Caller is responsible for deleting the file when done.
+  Future<File> _downloadImageToTempFile() async {
+    final imageUrl = '$_storageBaseUrl/${widget.fileName}';
+    final response = await http.get(Uri.parse(imageUrl));
+    if (response.statusCode != 200) {
+      throw Exception(
+        'Failed to download image (HTTP ${response.statusCode})',
+      );
+    }
+    final tempDir = await getTemporaryDirectory();
+    final file = File('${tempDir.path}/tindart_wallpaper_temp.jpg');
+    await file.writeAsBytes(response.bodyBytes);
+    return file;
+  }
+
   Future<void> _showWallpaperConfirmation(BuildContext context) async {
     if (Platform.isIOS) {
       // iOS: Save to Photos and show instructions
@@ -139,6 +158,7 @@ class _CardBackState extends State<CardBack> {
   }
 
   Future<void> _saveToPhotosForWallpaper() async {
+    File? tempFile;
     try {
       setState(() {
         _settingWallpaper = true;
@@ -154,27 +174,10 @@ class _CardBackState extends State<CardBack> {
       }
 
       // Download the image
-      final imageUrl =
-          'https://storage.googleapis.com/tindart-8c83b.firebasestorage.app/${widget.fileName}';
-      final response = await http.get(Uri.parse(imageUrl));
-      if (response.statusCode != 200) {
-        throw Exception('Failed to download image');
-      }
-
-      // Save to temporary file first
-      final tempDir = await getTemporaryDirectory();
-      final file = File('${tempDir.path}/tindart_wallpaper.jpg');
-      await file.writeAsBytes(response.bodyBytes);
+      tempFile = await _downloadImageToTempFile();
 
       // Save to Photos library
-      await Gal.putImage(file.path, album: 'TindArt');
-
-      // Clean up temp file
-      await file.delete();
-
-      setState(() {
-        _settingWallpaper = false;
-      });
+      await Gal.putImage(tempFile.path, album: 'TindArt');
 
       if (mounted) {
         showDialog(
@@ -200,10 +203,6 @@ class _CardBackState extends State<CardBack> {
         );
       }
     } catch (e) {
-      setState(() {
-        _settingWallpaper = false;
-      });
-
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
@@ -212,55 +211,39 @@ class _CardBackState extends State<CardBack> {
           ),
         );
       }
+    } finally {
+      // Always clean up temp file
+      if (tempFile != null && await tempFile.exists()) {
+        await tempFile.delete();
+      }
+      setState(() {
+        _settingWallpaper = false;
+      });
     }
   }
 
   Future<void> _setWallpaperAndroid(String type) async {
+    File? tempFile;
     try {
       setState(() {
         _settingWallpaper = true;
       });
 
-      // Construct the Firebase Storage URL
-      final imageUrl =
-          'https://storage.googleapis.com/tindart-8c83b.firebasestorage.app/${widget.fileName}';
-
       // Download the image to temporary file
-      final response = await http.get(Uri.parse(imageUrl));
-      if (response.statusCode != 200) {
-        throw Exception('Failed to download image');
-      }
-
-      // Save to temporary directory
-      final tempDir = await getTemporaryDirectory();
-      final file = File('${tempDir.path}/wallpaper_temp.jpg');
-      await file.writeAsBytes(response.bodyBytes);
+      tempFile = await _downloadImageToTempFile();
 
       // Set wallpaper based on user choice
-      bool success = false;
-      if (type == 'home') {
-        success = await AsyncWallpaper.setWallpaper(
-          url: file.path,
-          wallpaperLocation: AsyncWallpaper.HOME_SCREEN,
-        );
-      } else if (type == 'lock') {
-        success = await AsyncWallpaper.setWallpaper(
-          url: file.path,
-          wallpaperLocation: AsyncWallpaper.LOCK_SCREEN,
-        );
-      } else if (type == 'both') {
-        success = await AsyncWallpaper.setWallpaper(
-          url: file.path,
-          wallpaperLocation: AsyncWallpaper.BOTH_SCREENS,
-        );
-      }
+      final wallpaperLocation = switch (type) {
+        'home' => AsyncWallpaper.HOME_SCREEN,
+        'lock' => AsyncWallpaper.LOCK_SCREEN,
+        'both' => AsyncWallpaper.BOTH_SCREENS,
+        _ => throw Exception('Invalid wallpaper type: $type'),
+      };
 
-      // Clean up temp file
-      await file.delete();
-
-      setState(() {
-        _settingWallpaper = false;
-      });
+      final success = await AsyncWallpaper.setWallpaper(
+        url: tempFile.path,
+        wallpaperLocation: wallpaperLocation,
+      );
 
       // Show result
       if (mounted) {
@@ -274,10 +257,6 @@ class _CardBackState extends State<CardBack> {
         );
       }
     } catch (e) {
-      setState(() {
-        _settingWallpaper = false;
-      });
-
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
@@ -286,6 +265,14 @@ class _CardBackState extends State<CardBack> {
           ),
         );
       }
+    } finally {
+      // Always clean up temp file
+      if (tempFile != null && await tempFile.exists()) {
+        await tempFile.delete();
+      }
+      setState(() {
+        _settingWallpaper = false;
+      });
     }
   }
 
