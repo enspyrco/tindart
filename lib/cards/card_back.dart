@@ -243,7 +243,7 @@ class _CardBackState extends State<CardBack> {
       };
 
       await WallpaperManagerPlus().setWallpaper(
-        tempFile.path,
+        tempFile,
         wallpaperLocation,
       );
 
