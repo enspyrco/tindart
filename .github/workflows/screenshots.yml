@@ -90,17 +90,17 @@ jobs:
             -H "Content-Type: application/json" \
             -d '{"fields":{"ids":{"arrayValue":{"values":[{"stringValue":"test-image-1"},{"stringValue":"test-image-2"},{"stringValue":"test-image-3"}]}}}}'
 
-          # Seed image-docs collection with test images
+          # Seed image-docs collection with real images from storage
           echo "Seeding image-docs..."
           curl -s -X PATCH "http://localhost:8080/v1/projects/tindart-8c83b/databases/(default)/documents/image-docs/test-image-1" \
             -H "Content-Type: application/json" \
-            -d '{"fields":{"name":{"stringValue":"test-placeholder-1.jpg"}}}'
+            -d '{"fields":{"name":{"stringValue":"FB_IMG_1721890902802.jpg"}}}'
           curl -s -X PATCH "http://localhost:8080/v1/projects/tindart-8c83b/databases/(default)/documents/image-docs/test-image-2" \
             -H "Content-Type: application/json" \
-            -d '{"fields":{"name":{"stringValue":"test-placeholder-2.jpg"}}}'
+            -d '{"fields":{"name":{"stringValue":"FB_IMG_1721890902802.jpg"}}}'
           curl -s -X PATCH "http://localhost:8080/v1/projects/tindart-8c83b/databases/(default)/documents/image-docs/test-image-3" \
             -H "Content-Type: application/json" \
-            -d '{"fields":{"name":{"stringValue":"test-placeholder-3.jpg"}}}'
+            -d '{"fields":{"name":{"stringValue":"FB_IMG_1721890902802.jpg"}}}'
 
       - name: Build APK for testing (with emulator)
         run: flutter build apk --debug --dart-define=USE_FIREBASE_EMULATOR=true
@@ -211,17 +211,17 @@ jobs:
             -H "Content-Type: application/json" \
             -d '{"fields":{"ids":{"arrayValue":{"values":[{"stringValue":"test-image-1"},{"stringValue":"test-image-2"},{"stringValue":"test-image-3"}]}}}}'
 
-          # Seed image-docs collection with test images
+          # Seed image-docs collection with real images from storage
           echo "Seeding image-docs..."
           curl -s -X PATCH "http://localhost:8080/v1/projects/tindart-8c83b/databases/(default)/documents/image-docs/test-image-1" \
             -H "Content-Type: application/json" \
-            -d '{"fields":{"name":{"stringValue":"test-placeholder-1.jpg"}}}'
+            -d '{"fields":{"name":{"stringValue":"FB_IMG_1721890902802.jpg"}}}'
           curl -s -X PATCH "http://localhost:8080/v1/projects/tindart-8c83b/databases/(default)/documents/image-docs/test-image-2" \
             -H "Content-Type: application/json" \
-            -d '{"fields":{"name":{"stringValue":"test-placeholder-2.jpg"}}}'
+            -d '{"fields":{"name":{"stringValue":"FB_IMG_1721890902802.jpg"}}}'
           curl -s -X PATCH "http://localhost:8080/v1/projects/tindart-8c83b/databases/(default)/documents/image-docs/test-image-3" \
             -H "Content-Type: application/json" \
-            -d '{"fields":{"name":{"stringValue":"test-placeholder-3.jpg"}}}'
+            -d '{"fields":{"name":{"stringValue":"FB_IMG_1721890902802.jpg"}}}'
 
       - name: Install Maestro
         run: |
