@@ -1,6 +1,7 @@
 import 'package:flutter/foundation.dart';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:cloud_functions/cloud_functions.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_crashlytics/firebase_crashlytics.dart';
@@ -70,19 +71,29 @@ void main() async {
     final host = defaultTargetPlatform == TargetPlatform.android
         ? '10.0.2.2'
         : 'localhost';
+    debugPrint('🔧 Emulator mode: connecting to $host');
     await FirebaseAuth.instance.useAuthEmulator(host, 9099);
     FirebaseFirestore.instance.useFirestoreEmulator(host, 8080);
-    // Auto sign-in with test user for screenshots
-    try {
-      await FirebaseAuth.instance.signInWithEmailAndPassword(
-        email: 'test@example.com',
-        password: 'testpassword123',
-      );
-      // Mark user as onboarded in SharedPreferences (used by AuthService)
-      final prefs = await SharedPreferences.getInstance();
-      await prefs.setBool('onboarded', true);
-    } catch (e) {
-      // User might not exist yet, ignore
+    FirebaseFunctions.instance.useFunctionsEmulator(host, 5001);
+    // Auto sign-in with test user for screenshots (with retry)
+    for (int attempt = 1; attempt <= 3; attempt++) {
+      try {
+        debugPrint('🔧 Sign-in attempt $attempt...');
+        await FirebaseAuth.instance.signInWithEmailAndPassword(
+          email: 'test@example.com',
+          password: 'testpassword123',
+        );
+        debugPrint('🔧 Sign-in successful!');
+        // Mark user as onboarded in SharedPreferences (used by AuthService)
+        final prefs = await SharedPreferences.getInstance();
+        await prefs.setBool('onboarded', true);
+        break;
+      } catch (e) {
+        debugPrint('🔧 Sign-in attempt $attempt failed: $e');
+        if (attempt < 3) {
+          await Future.delayed(const Duration(seconds: 2));
+        }
+      }
     }
   }
 

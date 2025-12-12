@@ -32,9 +32,9 @@ appId: co.enspyr.tindart
 - waitForAnimationToEnd
 - takeScreenshot: screenshots/02_card_back
 
-# 3. Tap menu button (top-right corner)
+# 3. Tap menu button (using accessibility label regex)
 - tapOn:
-    point: "95%,6%"
+    text: "menu.*"
 - waitForAnimationToEnd
 - takeScreenshot: screenshots/03_menu_open
 

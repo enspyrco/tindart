@@ -53,14 +53,21 @@ jobs:
       - name: Install Firebase CLI
         run: npm install -g firebase-tools
 
+      - name: Build Cloud Functions
+        run: |
+          cd functions
+          npm ci
+          npm run build
+
       - name: Start Firebase Emulators
         run: |
-          firebase emulators:start --only auth,firestore &
+          firebase emulators:start --only auth,firestore,functions &
           echo "Waiting for emulators to start..."
           sleep 15
           # Verify emulators are running
           curl -s http://localhost:9099/ || echo "Auth emulator not responding"
           curl -s http://localhost:8080/ || echo "Firestore emulator not responding"
+          curl -s http://localhost:5001/ || echo "Functions emulator not responding"
           # Create test user via Auth emulator REST API and capture the response
           echo "Creating test user..."
           RESPONSE=$(curl -s -X POST "http://localhost:9099/identitytoolkit.googleapis.com/v1/accounts:signUp?key=fake-api-key" \
@@ -129,15 +136,28 @@ jobs:
             echo "Verifying Firebase emulators..."
             curl -s http://localhost:9099/ || echo "WARNING: Auth emulator not accessible"
             curl -s http://localhost:8080/ || echo "WARNING: Firestore emulator not accessible"
+            curl -s http://localhost:5001/ || echo "WARNING: Functions emulator not accessible"
             # Verify test data exists
             echo "Verifying test data..."
             curl -s "http://localhost:8080/v1/projects/tindart-8c83b/databases/(default)/documents/doc-id-lists/RMCevRY4dGpUTTcrltun"
             # Install and run
             adb install build/app/outputs/flutter-apk/app-debug.apk
             mkdir -p screenshots
-            # Add delay for app to fully initialize
-            sleep 5
-            maestro test .maestro/screenshots.yaml
+            # Start capturing logcat in background for debugging
+            adb logcat -c  # Clear logcat
+            adb logcat > logcat.txt 2>&1 &
+            LOGCAT_PID=$!
+            # Launch app first to trigger sign-in
+            adb shell am start -n co.enspyr.tindart/.MainActivity
+            # Wait for app to initialize and sign in (with retries)
+            sleep 10
+            # Run Maestro tests
+            maestro test .maestro/screenshots.yaml || true
+            # Stop logcat and save
+            kill $LOGCAT_PID || true
+            # Show relevant logs
+            echo "=== Flutter logs ==="
+            grep -i "flutter\|🔧" logcat.txt | tail -100 || true
 
       - name: Upload Screenshots
         if: always()
@@ -152,6 +172,13 @@ jobs:
         with:
           name: android-maestro-debug
           path: ~/.maestro/tests/
+
+      - name: Upload Logcat
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: android-logcat
+          path: logcat.txt
 
   screenshots-ios:
     name: iOS Screenshots
@@ -184,14 +211,21 @@ jobs:
       - name: Install Firebase CLI
         run: npm install -g firebase-tools
 
+      - name: Build Cloud Functions
+        run: |
+          cd functions
+          npm ci
+          npm run build
+
       - name: Start Firebase Emulators
         run: |
-          firebase emulators:start --only auth,firestore &
+          firebase emulators:start --only auth,firestore,functions &
           echo "Waiting for emulators to start..."
           sleep 15
           # Verify emulators are running
           curl -s http://localhost:9099/ || echo "Auth emulator not responding"
           curl -s http://localhost:8080/ || echo "Firestore emulator not responding"
+          curl -s http://localhost:5001/ || echo "Functions emulator not responding"
           # Create test user via Auth emulator REST API and capture the response
           echo "Creating test user..."
           RESPONSE=$(curl -s -X POST "http://localhost:9099/identitytoolkit.googleapis.com/v1/accounts:signUp?key=fake-api-key" \
