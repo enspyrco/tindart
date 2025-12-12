@@ -45,8 +45,33 @@ jobs:
       - name: Install dependencies
         run: flutter pub get
 
-      - name: Build APK for testing
-        run: flutter build apk --debug
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Install Firebase CLI
+        run: npm install -g firebase-tools
+
+      - name: Start Firebase Emulators
+        run: |
+          firebase emulators:start --only auth,firestore &
+          sleep 10
+          # Create test user via Auth emulator REST API and capture the response
+          RESPONSE=$(curl -s -X POST "http://localhost:9099/identitytoolkit.googleapis.com/v1/accounts:signUp?key=fake-api-key" \
+            -H "Content-Type: application/json" \
+            -d '{"email":"test@example.com","password":"testpassword123","returnSecureToken":true}')
+          echo "Auth response: $RESPONSE"
+          # Extract localId (user UID) from response
+          USER_UID=$(echo $RESPONSE | jq -r '.localId')
+          echo "User UID: $USER_UID"
+          # Mark user as having completed onboarding in users collection
+          curl -X PATCH "http://localhost:8080/v1/projects/tindart-8c83b/databases/(default)/documents/users/${USER_UID}" \
+            -H "Content-Type: application/json" \
+            -d '{"fields":{"onboarded":{"booleanValue":true},"name":{"stringValue":"Test User"}}}'
+
+      - name: Build APK for testing (with emulator)
+        run: flutter build apk --debug --dart-define=USE_FIREBASE_EMULATOR=true
         env:
           GRADLE_OPTS: "-Dorg.gradle.daemon=false"
 
@@ -101,6 +126,31 @@ jobs:
           export LANG=en_US.UTF-8
           cd ios && pod install
 
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Install Firebase CLI
+        run: npm install -g firebase-tools
+
+      - name: Start Firebase Emulators
+        run: |
+          firebase emulators:start --only auth,firestore &
+          sleep 10
+          # Create test user via Auth emulator REST API and capture the response
+          RESPONSE=$(curl -s -X POST "http://localhost:9099/identitytoolkit.googleapis.com/v1/accounts:signUp?key=fake-api-key" \
+            -H "Content-Type: application/json" \
+            -d '{"email":"test@example.com","password":"testpassword123","returnSecureToken":true}')
+          echo "Auth response: $RESPONSE"
+          # Extract localId (user UID) from response
+          USER_UID=$(echo $RESPONSE | jq -r '.localId')
+          echo "User UID: $USER_UID"
+          # Mark user as having completed onboarding in users collection
+          curl -X PATCH "http://localhost:8080/v1/projects/tindart-8c83b/databases/(default)/documents/users/${USER_UID}" \
+            -H "Content-Type: application/json" \
+            -d '{"fields":{"onboarded":{"booleanValue":true},"name":{"stringValue":"Test User"}}}'
+
       - name: Install Maestro
         run: |
           curl -Ls "https://get.maestro.mobile.dev" | bash
@@ -116,7 +166,7 @@ jobs:
 
       - name: Build and install iOS app
         run: |
-          flutter build ios --debug --simulator
+          flutter build ios --debug --simulator --dart-define=USE_FIREBASE_EMULATOR=true
           xcrun simctl install booted build/ios/iphonesimulator/Runner.app
 
       - name: Run Maestro Screenshots

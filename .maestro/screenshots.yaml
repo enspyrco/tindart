@@ -2,26 +2,28 @@ appId: co.enspyr.tindart
 ---
 # Screenshot flow for App Store and Play Store
 # Run with: maestro test .maestro/screenshots.yaml
+#
+# Requires: App built with --dart-define=USE_FIREBASE_EMULATOR=true
+# and Firebase emulators running with test user created.
 
-# Wait for app to load
+# Wait for app to load and show home screen
 - waitForAnimationToEnd
 - extendedWaitUntil:
     visible: "TindArt"
-    timeout: 30000
+    timeout: 60000
 
 # 1. Home screen with cards
 - takeScreenshot: screenshots/01_home_screen
 
 # 2. Double tap to flip card (show card back with metadata)
 - doubleTapOn:
-    index: 0
-
+    point: "50%,50%"
 - waitForAnimationToEnd
 - takeScreenshot: screenshots/02_card_back
 
-# 3. Tap menu button (top-right corner, ~95% from left, ~5% from top)
+# 3. Tap menu button (top-right corner)
 - tapOn:
-    point: "95%,5%"
+    point: "95%,6%"
 - waitForAnimationToEnd
 - takeScreenshot: screenshots/03_menu_open
 
@@ -30,19 +32,18 @@ appId: co.enspyr.tindart
 - waitForAnimationToEnd
 - takeScreenshot: screenshots/04_find_similar
 
-# 5. Go back and continue
+# 5. Close the sheet and go back
 - pressKey: back
 - waitForAnimationToEnd
 
 # 6. Double tap to flip back to front
 - doubleTapOn:
-    index: 0
+    point: "50%,50%"
 - waitForAnimationToEnd
 
 # 7. Swipe right to show like action
 - swipe:
     direction: RIGHT
     duration: 500
-
 - waitForAnimationToEnd
 - takeScreenshot: screenshots/05_swipe_right

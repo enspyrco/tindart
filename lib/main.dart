@@ -1,4 +1,4 @@
-import 'dart:ui';
+import 'package:flutter/foundation.dart';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -56,9 +56,31 @@ final _router = GoRouter(
     ),
   ],
 );
+// Set via --dart-define=USE_FIREBASE_EMULATOR=true
+const bool useEmulator = bool.fromEnvironment('USE_FIREBASE_EMULATOR');
+
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
+
+  // Connect to Firebase emulator for testing
+  if (useEmulator) {
+    // Android emulator uses 10.0.2.2 to reach host, iOS uses localhost
+    final host = defaultTargetPlatform == TargetPlatform.android
+        ? '10.0.2.2'
+        : 'localhost';
+    await FirebaseAuth.instance.useAuthEmulator(host, 9099);
+    FirebaseFirestore.instance.useFirestoreEmulator(host, 8080);
+    // Auto sign-in with test user for screenshots
+    try {
+      await FirebaseAuth.instance.signInWithEmailAndPassword(
+        email: 'test@example.com',
+        password: 'testpassword123',
+      );
+    } catch (e) {
+      // User might not exist yet, ignore
+    }
+  }
 
   // Pass all uncaught "fatal" errors from the framework to Crashlytics
   FlutterError.onError = (errorDetails) {
