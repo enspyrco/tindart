@@ -10,7 +10,8 @@ class WebDetectionSheet extends StatelessWidget {
   Widget build(BuildContext context) {
     final bestGuessLabels = (data['bestGuessLabels'] as List?) ?? [];
     final webEntities = (data['webEntities'] as List?) ?? [];
-    final visuallySimilarImages = (data['visuallySimilarImages'] as List?) ?? [];
+    final visuallySimilarImages =
+        (data['visuallySimilarImages'] as List?) ?? [];
     final pagesWithMatchingImages =
         (data['pagesWithMatchingImages'] as List?) ?? [];
 
@@ -75,7 +76,8 @@ class WebDetectionSheet extends StatelessWidget {
                     scrollDirection: Axis.horizontal,
                     itemCount: visuallySimilarImages.length.clamp(0, 10),
                     itemBuilder: (context, index) {
-                      final url = visuallySimilarImages[index]['url'] as String?;
+                      final url =
+                          visuallySimilarImages[index]['url'] as String?;
                       if (url == null) return const SizedBox.shrink();
                       return Padding(
                         padding: const EdgeInsets.only(right: 8),
