@@ -56,8 +56,13 @@ jobs:
       - name: Start Firebase Emulators
         run: |
           firebase emulators:start --only auth,firestore &
-          sleep 10
+          echo "Waiting for emulators to start..."
+          sleep 15
+          # Verify emulators are running
+          curl -s http://localhost:9099/ || echo "Auth emulator not responding"
+          curl -s http://localhost:8080/ || echo "Firestore emulator not responding"
           # Create test user via Auth emulator REST API and capture the response
+          echo "Creating test user..."
           RESPONSE=$(curl -s -X POST "http://localhost:9099/identitytoolkit.googleapis.com/v1/accounts:signUp?key=fake-api-key" \
             -H "Content-Type: application/json" \
             -d '{"email":"test@example.com","password":"testpassword123","returnSecureToken":true}')
@@ -65,10 +70,19 @@ jobs:
           # Extract localId (user UID) from response
           USER_UID=$(echo $RESPONSE | jq -r '.localId')
           echo "User UID: $USER_UID"
+          if [ -z "$USER_UID" ] || [ "$USER_UID" = "null" ]; then
+            echo "ERROR: Failed to create test user!"
+            exit 1
+          fi
           # Mark user as having completed onboarding in users collection
-          curl -X PATCH "http://localhost:8080/v1/projects/tindart-8c83b/databases/(default)/documents/users/${USER_UID}" \
+          echo "Setting user as onboarded..."
+          FIRESTORE_RESPONSE=$(curl -s -X PATCH "http://localhost:8080/v1/projects/tindart-8c83b/databases/(default)/documents/users/${USER_UID}" \
             -H "Content-Type: application/json" \
-            -d '{"fields":{"onboarded":{"booleanValue":true},"name":{"stringValue":"Test User"}}}'
+            -d '{"fields":{"onboarded":{"booleanValue":true},"name":{"stringValue":"Test User"}}}')
+          echo "Firestore response: $FIRESTORE_RESPONSE"
+          # Verify user document was created
+          echo "Verifying user document..."
+          curl -s "http://localhost:8080/v1/projects/tindart-8c83b/databases/(default)/documents/users/${USER_UID}"
 
       - name: Build APK for testing (with emulator)
         run: flutter build apk --debug --dart-define=USE_FIREBASE_EMULATOR=true
@@ -98,10 +112,18 @@ jobs:
             maestro test .maestro/screenshots.yaml
 
       - name: Upload Screenshots
+        if: always()
         uses: actions/upload-artifact@v4
         with:
           name: android-screenshots
           path: screenshots/
+
+      - name: Upload Maestro Debug Artifacts
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: android-maestro-debug
+          path: ~/.maestro/tests/
 
   screenshots-ios:
     name: iOS Screenshots
@@ -137,8 +159,13 @@ jobs:
       - name: Start Firebase Emulators
         run: |
           firebase emulators:start --only auth,firestore &
-          sleep 10
+          echo "Waiting for emulators to start..."
+          sleep 15
+          # Verify emulators are running
+          curl -s http://localhost:9099/ || echo "Auth emulator not responding"
+          curl -s http://localhost:8080/ || echo "Firestore emulator not responding"
           # Create test user via Auth emulator REST API and capture the response
+          echo "Creating test user..."
           RESPONSE=$(curl -s -X POST "http://localhost:9099/identitytoolkit.googleapis.com/v1/accounts:signUp?key=fake-api-key" \
             -H "Content-Type: application/json" \
             -d '{"email":"test@example.com","password":"testpassword123","returnSecureToken":true}')
@@ -146,10 +173,19 @@ jobs:
           # Extract localId (user UID) from response
           USER_UID=$(echo $RESPONSE | jq -r '.localId')
           echo "User UID: $USER_UID"
+          if [ -z "$USER_UID" ] || [ "$USER_UID" = "null" ]; then
+            echo "ERROR: Failed to create test user!"
+            exit 1
+          fi
           # Mark user as having completed onboarding in users collection
-          curl -X PATCH "http://localhost:8080/v1/projects/tindart-8c83b/databases/(default)/documents/users/${USER_UID}" \
+          echo "Setting user as onboarded..."
+          FIRESTORE_RESPONSE=$(curl -s -X PATCH "http://localhost:8080/v1/projects/tindart-8c83b/databases/(default)/documents/users/${USER_UID}" \
             -H "Content-Type: application/json" \
-            -d '{"fields":{"onboarded":{"booleanValue":true},"name":{"stringValue":"Test User"}}}'
+            -d '{"fields":{"onboarded":{"booleanValue":true},"name":{"stringValue":"Test User"}}}')
+          echo "Firestore response: $FIRESTORE_RESPONSE"
+          # Verify user document was created
+          echo "Verifying user document..."
+          curl -s "http://localhost:8080/v1/projects/tindart-8c83b/databases/(default)/documents/users/${USER_UID}"
 
       - name: Install Maestro
         run: |
@@ -175,10 +211,18 @@ jobs:
           maestro test .maestro/screenshots.yaml
 
       - name: Upload Screenshots
+        if: always()
         uses: actions/upload-artifact@v4
         with:
           name: ios-screenshots
           path: screenshots/
+
+      - name: Upload Maestro Debug Artifacts
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: ios-maestro-debug
+          path: ~/.maestro/tests/
 
   # Upload screenshots to stores (only on version tags)
   upload-to-stores:

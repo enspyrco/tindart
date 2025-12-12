@@ -6,6 +6,7 @@ import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_crashlytics/firebase_crashlytics.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:tindart/auth/auth_service.dart';
 import 'package:tindart/auth/sign_in_screen.dart';
 import 'package:tindart/comments/comments_service.dart';
@@ -77,6 +78,9 @@ void main() async {
         email: 'test@example.com',
         password: 'testpassword123',
       );
+      // Mark user as onboarded in SharedPreferences (used by AuthService)
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.setBool('onboarded', true);
     } catch (e) {
       // User might not exist yet, ignore
     }

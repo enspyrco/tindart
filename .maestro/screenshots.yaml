@@ -6,8 +6,13 @@ appId: co.enspyr.tindart
 # Requires: App built with --dart-define=USE_FIREBASE_EMULATOR=true
 # and Firebase emulators running with test user created.
 
-# Wait for app to load and show home screen
+# Wait for app to load
 - waitForAnimationToEnd
+
+# Debug: capture initial screen state
+- takeScreenshot: screenshots/00_debug_initial
+
+# Wait for home screen to appear (with TindArt title)
 - extendedWaitUntil:
     visible: "TindArt"
     timeout: 60000
