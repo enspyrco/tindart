@@ -121,13 +121,44 @@ jobs:
           name: ios-screenshots
           path: screenshots/
 
-  # Optional: Use Maestro Cloud for both platforms (recommended for production)
-  # screenshots-cloud:
-  #   name: Maestro Cloud Screenshots
-  #   runs-on: ubuntu-latest
-  #   steps:
-  #     - uses: actions/checkout@v4
-  #     - uses: mobile-dev-inc/action-maestro-cloud@v1
-  #       with:
-  #         api-key: ${{ secrets.MAESTRO_CLOUD_API_KEY }}
-  #         app-file: build/app/outputs/flutter-apk/app-release.apk
+  # Upload screenshots to stores (only on version tags)
+  upload-to-stores:
+    name: Upload to Stores
+    needs: [screenshots-android, screenshots-ios]
+    runs-on: ubuntu-latest
+    if: startsWith(github.ref, 'refs/tags/v')
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Ruby
+        uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: '3.2'
+          bundler-cache: true
+
+      - name: Download Android screenshots
+        uses: actions/download-artifact@v4
+        with:
+          name: android-screenshots
+          path: fastlane/metadata/android/en-US/images/phoneScreenshots/
+
+      - name: Download iOS screenshots
+        uses: actions/download-artifact@v4
+        with:
+          name: ios-screenshots
+          path: fastlane/screenshots/en-US/
+
+      - name: Upload to Google Play Store
+        run: bundle exec fastlane android upload_screenshots
+        env:
+          PLAY_STORE_JSON_KEY: ${{ secrets.PLAY_STORE_JSON_KEY }}
+
+      - name: Upload to App Store Connect
+        run: bundle exec fastlane ios upload_screenshots
+        env:
+          APPLE_ID: ${{ secrets.APPLE_ID }}
+          TEAM_ID: ${{ secrets.TEAM_ID }}
+          FASTLANE_APPLE_APPLICATION_SPECIFIC_PASSWORD: ${{ secrets.APPLE_APP_SPECIFIC_PASSWORD }}
+          FASTLANE_PASSWORD: ${{ secrets.APPLE_APP_SPECIFIC_PASSWORD }}

@@ -1,0 +1,10 @@
+# App identifiers
+app_identifier("co.enspyr.tindart")
+
+# Apple Developer Portal / App Store Connect
+apple_id(ENV["APPLE_ID"]) # Your Apple Developer email
+itc_team_id(ENV["ITC_TEAM_ID"]) # App Store Connect Team ID
+team_id(ENV["TEAM_ID"]) # Apple Developer Portal Team ID
+
+# Google Play
+json_key_data(ENV["PLAY_STORE_JSON_KEY"])
