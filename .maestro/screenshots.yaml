@@ -5,35 +5,37 @@ appId: co.enspyr.tindart
 
 # Wait for app to load
 - waitForAnimationToEnd
+- extendedWaitUntil:
+    visible: "TindArt"
+    timeout: 30000
 
 # 1. Home screen with cards
 - takeScreenshot: screenshots/01_home_screen
 
-# 2. Double tap to flip card (show card back with menu)
+# 2. Double tap to flip card (show card back with metadata)
 - doubleTapOn:
     index: 0
 
 - waitForAnimationToEnd
 - takeScreenshot: screenshots/02_card_back
 
-# 3. Open menu to show options
-- tapOn: "Menu"
-
-- waitForAnimationToEnd
-- takeScreenshot: screenshots/03_menu_options
-
-# 4. Close menu and go back to home
-- pressKey: back
+# 3. Double tap again to flip back to front
 - doubleTapOn:
     index: 0
 - waitForAnimationToEnd
 
-# 5. Swipe right to show like animation
+# 4. Swipe right to show like action
 - swipe:
     direction: RIGHT
     duration: 500
 
-- takeScreenshot: screenshots/04_swipe_right
+- waitForAnimationToEnd
+- takeScreenshot: screenshots/03_swipe_right
 
-# Note: Screenshots for "Find Similar" and "Set Wallpaper" dialogs
-# would require authentication. Add those flows separately if needed.
+# 5. Swipe left on next card
+- swipe:
+    direction: LEFT
+    duration: 500
+
+- waitForAnimationToEnd
+- takeScreenshot: screenshots/04_swipe_left
