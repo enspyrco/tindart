@@ -19,23 +19,30 @@ appId: co.enspyr.tindart
 - waitForAnimationToEnd
 - takeScreenshot: screenshots/02_card_back
 
-# 3. Double tap again to flip back to front
+# 3. Tap menu button (top-right corner, ~95% from left, ~5% from top)
+- tapOn:
+    point: "95%,5%"
+- waitForAnimationToEnd
+- takeScreenshot: screenshots/03_menu_open
+
+# 4. Tap "Find Similar" menu item
+- tapOn: "Find Similar"
+- waitForAnimationToEnd
+- takeScreenshot: screenshots/04_find_similar
+
+# 5. Go back and continue
+- pressKey: back
+- waitForAnimationToEnd
+
+# 6. Double tap to flip back to front
 - doubleTapOn:
     index: 0
 - waitForAnimationToEnd
 
-# 4. Swipe right to show like action
+# 7. Swipe right to show like action
 - swipe:
     direction: RIGHT
     duration: 500
 
 - waitForAnimationToEnd
-- takeScreenshot: screenshots/03_swipe_right
-
-# 5. Swipe left on next card
-- swipe:
-    direction: LEFT
-    duration: 500
-
-- waitForAnimationToEnd
-- takeScreenshot: screenshots/04_swipe_left
+- takeScreenshot: screenshots/05_swipe_right
