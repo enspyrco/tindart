@@ -278,7 +278,7 @@ class _CardBackState extends State<CardBack> {
     }
   }
 
-  Future<void> _showWebDetectionResults(BuildContext context) async {
+  Future<void> _showWebDetectionResults() async {
     final imageUrl = '$_storageBaseUrl/${widget.fileName}';
     setState(() {
       _searchingWeb = true;
@@ -309,7 +309,7 @@ class _CardBackState extends State<CardBack> {
       showModalBottomSheet(
         context: context,
         isScrollControlled: true,
-        builder: (context) => WebDetectionSheet(data: data),
+        builder: (sheetContext) => WebDetectionSheet(data: data),
       );
     } catch (e) {
       setState(() {
@@ -345,7 +345,7 @@ class _CardBackState extends State<CardBack> {
                 case _MenuAction.setWallpaper:
                   _showWallpaperConfirmation(context);
                 case _MenuAction.webDetection:
-                  _showWebDetectionResults(context);
+                  _showWebDetectionResults();
               }
             },
             itemBuilder: (BuildContext context) => [
