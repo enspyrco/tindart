@@ -17,8 +17,7 @@ appId: co.enspyr.tindart
 - takeScreenshot: screenshots/02_card_back
 
 # 3. Open menu to show options
-- tapOn:
-    id: ".*more_vert.*"
+- tapOn: "Menu"
 
 - waitForAnimationToEnd
 - takeScreenshot: screenshots/03_menu_options
