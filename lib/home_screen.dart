@@ -96,6 +96,26 @@ class _HomeScreenState extends State<HomeScreen> {
     });
   }
 
+  Future<void> _savePreference({
+    required String docId,
+    required String userId,
+    required String field,
+  }) async {
+    try {
+      await Future.wait([
+        FirebaseFirestore.instance.collection('preferences').doc(userId).set({
+          field: FieldValue.arrayUnion([docId]),
+          'timestamp': FieldValue.serverTimestamp(),
+        }, SetOptions(merge: true)),
+        FirebaseFirestore.instance.collection('image-docs').doc(docId).set({
+          field: FieldValue.arrayUnion([userId]),
+        }, SetOptions(merge: true)),
+      ]);
+    } catch (e) {
+      log('Error saving $field: $e');
+    }
+  }
+
   @override
   void initState() {
     super.initState();
@@ -121,68 +141,32 @@ class _HomeScreenState extends State<HomeScreen> {
                 if (currentIndex == 5) {
                   _retrieveNextImages();
                   return true;
-                } else {
-                  final userId = FirebaseAuth.instance.currentUser?.uid;
-                  if (userId == null) return true;
-
-                  if (currentIndex != null &&
-                      currentIndex < _cardDocIds.length &&
-                      direction == CardSwiperDirection.left) {
-                    try {
-                      final docId = _cardDocIds[currentIndex];
-
-                      await Future.wait([
-                        FirebaseFirestore.instance
-                            .collection('preferences')
-                            .doc(userId)
-                            .set({
-                          'disliked': FieldValue.arrayUnion([docId]),
-                          'timestamp': FieldValue.serverTimestamp(),
-                        }, SetOptions(merge: true)),
-                        FirebaseFirestore.instance
-                            .collection('image-docs')
-                            .doc(docId)
-                            .set({
-                          'disliked': FieldValue.arrayUnion([userId]),
-                        }, SetOptions(merge: true)),
-                      ]);
-                    } catch (e) {
-                      log('Error saving dislike: $e');
-                    }
-
-                    return true;
-                  }
-
-                  if (currentIndex != null &&
-                      currentIndex < _cardDocIds.length &&
-                      direction == CardSwiperDirection.right) {
-                    try {
-                      final docId = _cardDocIds[currentIndex];
-
-                      await Future.wait([
-                        FirebaseFirestore.instance
-                            .collection('preferences')
-                            .doc(userId)
-                            .set({
-                          'liked': FieldValue.arrayUnion([docId]),
-                          'timestamp': FieldValue.serverTimestamp(),
-                        }, SetOptions(merge: true)),
-                        FirebaseFirestore.instance
-                            .collection('image-docs')
-                            .doc(docId)
-                            .set({
-                          'liked': FieldValue.arrayUnion([userId]),
-                        }, SetOptions(merge: true)),
-                      ]);
-                    } catch (e) {
-                      log('Error saving like: $e');
-                    }
-
-                    return true;
-                  }
                 }
 
-                return false;
+                final userId = FirebaseAuth.instance.currentUser?.uid;
+                if (userId == null ||
+                    currentIndex == null ||
+                    currentIndex >= _cardDocIds.length) {
+                  return true;
+                }
+
+                final docId = _cardDocIds[currentIndex];
+
+                if (direction == CardSwiperDirection.left) {
+                  await _savePreference(
+                    docId: docId,
+                    userId: userId,
+                    field: 'disliked',
+                  );
+                } else if (direction == CardSwiperDirection.right) {
+                  await _savePreference(
+                    docId: docId,
+                    userId: userId,
+                    field: 'liked',
+                  );
+                }
+
+                return true;
               },
             ),
     );

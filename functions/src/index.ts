@@ -47,7 +47,7 @@ export const deleteUserAccount = functions.https.onCall(
       return {
         success: true,
         message: `Removed ${likedSnapshot.docs.length} likes and ` +
-          `${dislikedSnapshot.docs.length} dislike for user ${userId}}`,
+          `${dislikedSnapshot.docs.length} dislikes for user ${userId}`,
       };
     } catch (error) {
       functions.logger.error('Error deleting user account:', error);

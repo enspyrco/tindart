@@ -33,9 +33,6 @@ class _CardBackState extends State<CardBack> {
   bool _searchingWeb = false;
 
   Future<void> _signOut() async {
-    // SharedPreferences.getInstance().then((prefs) {
-    //   prefs.clear();
-    // });
     await locate<AuthService>().signOut();
     if (mounted) {
       context.go('/signin');
