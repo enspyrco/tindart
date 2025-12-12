@@ -1,0 +1,126 @@
+name: Screenshots
+
+on:
+  workflow_dispatch: # Manual trigger
+  push:
+    tags:
+      - 'v*' # Run on version tags
+
+jobs:
+  screenshots-android:
+    name: Android Screenshots
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'zulu'
+          java-version: '17'
+
+      - name: Setup Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+          flutter-version-file: pubspec.yaml
+          cache: true
+
+      - name: Install dependencies
+        run: flutter pub get
+
+      - name: Build APK for testing
+        run: flutter build apk --debug
+
+      - name: Install Maestro
+        run: |
+          curl -Ls "https://get.maestro.mobile.dev" | bash
+          echo "$HOME/.maestro/bin" >> $GITHUB_PATH
+
+      - name: Enable KVM
+        run: |
+          echo 'KERNEL=="kvm", GROUP="kvm", MODE="0666", OPTIONS+="static_node=kvm"' | sudo tee /etc/udev/rules.d/99-kvm4all.rules
+          sudo udevadm control --reload-rules
+          sudo udevadm trigger --name-match=kvm
+
+      - name: Run Maestro Screenshots
+        uses: reactivecircus/android-emulator-runner@v2
+        with:
+          api-level: 34
+          arch: x86_64
+          profile: pixel_6
+          script: |
+            adb install build/app/outputs/flutter-apk/app-debug.apk
+            mkdir -p screenshots
+            maestro test .maestro/screenshots.yaml
+
+      - name: Upload Screenshots
+        uses: actions/upload-artifact@v4
+        with:
+          name: android-screenshots
+          path: screenshots/
+
+  screenshots-ios:
+    name: iOS Screenshots
+    runs-on: macos-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+          flutter-version-file: pubspec.yaml
+          cache: true
+
+      - name: Install dependencies
+        run: flutter pub get
+
+      - name: Setup CocoaPods
+        run: |
+          export LANG=en_US.UTF-8
+          cd ios && pod install
+
+      - name: Install Maestro
+        run: |
+          curl -Ls "https://get.maestro.mobile.dev" | bash
+          echo "$HOME/.maestro/bin" >> $GITHUB_PATH
+
+      - name: Boot iOS Simulator
+        run: |
+          # List available simulators and boot iPhone 15 Pro Max
+          xcrun simctl list devices available
+          UDID=$(xcrun simctl list devices available | grep "iPhone 15 Pro Max" | head -1 | grep -oE '[0-9A-F-]{36}')
+          xcrun simctl boot "$UDID" || true
+          xcrun simctl list devices booted
+
+      - name: Build and install iOS app
+        run: |
+          flutter build ios --debug --simulator
+          xcrun simctl install booted build/ios/iphonesimulator/Runner.app
+
+      - name: Run Maestro Screenshots
+        run: |
+          mkdir -p screenshots
+          maestro test .maestro/screenshots.yaml
+
+      - name: Upload Screenshots
+        uses: actions/upload-artifact@v4
+        with:
+          name: ios-screenshots
+          path: screenshots/
+
+  # Optional: Use Maestro Cloud for both platforms (recommended for production)
+  # screenshots-cloud:
+  #   name: Maestro Cloud Screenshots
+  #   runs-on: ubuntu-latest
+  #   steps:
+  #     - uses: actions/checkout@v4
+  #     - uses: mobile-dev-inc/action-maestro-cloud@v1
+  #       with:
+  #         api-key: ${{ secrets.MAESTRO_CLOUD_API_KEY }}
+  #         app-file: build/app/outputs/flutter-apk/app-release.apk

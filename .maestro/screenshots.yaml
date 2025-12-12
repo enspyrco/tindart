@@ -1,0 +1,40 @@
+appId: co.enspyr.tindart
+---
+# Screenshot flow for App Store and Play Store
+# Run with: maestro test .maestro/screenshots.yaml
+
+# Wait for app to load
+- waitForAnimationToEnd
+
+# 1. Home screen with cards
+- takeScreenshot: screenshots/01_home_screen
+
+# 2. Double tap to flip card (show card back with menu)
+- doubleTapOn:
+    index: 0
+
+- waitForAnimationToEnd
+- takeScreenshot: screenshots/02_card_back
+
+# 3. Open menu to show options
+- tapOn:
+    id: ".*more_vert.*"
+
+- waitForAnimationToEnd
+- takeScreenshot: screenshots/03_menu_options
+
+# 4. Close menu and go back to home
+- pressKey: back
+- doubleTapOn:
+    index: 0
+- waitForAnimationToEnd
+
+# 5. Swipe right to show like animation
+- swipe:
+    direction: RIGHT
+    duration: 500
+
+- takeScreenshot: screenshots/04_swipe_right
+
+# Note: Screenshots for "Find Similar" and "Set Wallpaper" dialogs
+# would require authentication. Add those flows separately if needed.

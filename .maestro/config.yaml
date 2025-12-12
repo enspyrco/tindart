@@ -1,0 +1,11 @@
+# Maestro configuration
+# https://maestro.mobile.dev/reference/configuration
+
+# Default app ID
+appId: co.enspyr.tindart
+
+# Screenshot output directory
+outputDir: screenshots
+
+# Wait time for animations (ms)
+animationTimeout: 5000
