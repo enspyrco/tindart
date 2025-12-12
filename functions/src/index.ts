@@ -17,7 +17,7 @@ export const deleteUserAccount = functions.https.onCall(
 
       console.log(`User ${userId} is being removed`);
 
-      firestore.collection('preferences').doc(userId).delete();
+      await firestore.collection('preferences').doc(userId).delete();
       console.log(`Document preferences/${userId} deleted successfully`);
 
       const likedSnapshot = await firestore.collection('image-docs')
@@ -25,7 +25,7 @@ export const deleteUserAccount = functions.https.onCall(
         .get();
 
       for (const doc of likedSnapshot.docs) {
-        doc.ref.update({liked: FieldValue.arrayRemove(userId)});
+        await doc.ref.update({liked: FieldValue.arrayRemove(userId)});
       }
 
       console.log(`${likedSnapshot.docs.length} likes removed`);
@@ -35,7 +35,7 @@ export const deleteUserAccount = functions.https.onCall(
         .get();
 
       for (const doc of dislikedSnapshot.docs) {
-        doc.ref.update({disliked: FieldValue.arrayRemove(userId)});
+        await doc.ref.update({disliked: FieldValue.arrayRemove(userId)});
       }
 
       console.log(`${dislikedSnapshot.docs.length} dislikes removed`);
