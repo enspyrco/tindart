@@ -115,7 +115,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                   const Text(
                     'Swipe left on art you like less and right on art you like more.\n\n'
                     'The recommendation algorithm will provide art that other users with similar tastes have liked.\n\n'
-                    'Double tap to get metadata and account options.',
+                    'Double tap to get metadata, find similar images on the web, and access account options.',
                     style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
                   ),
                   const SizedBox(height: 30), // Adjusted spacing
