@@ -99,9 +99,9 @@ jobs:
 
       - name: Boot iOS Simulator
         run: |
-          # List available simulators and boot iPhone 15 Pro Max
+          # List available simulators and boot iPhone 16 Pro Max
           xcrun simctl list devices available
-          UDID=$(xcrun simctl list devices available | grep "iPhone 15 Pro Max" | head -1 | grep -oE '[0-9A-F-]{36}')
+          UDID=$(xcrun simctl list devices available | grep "iPhone 16 Pro Max" | head -1 | grep -oE '[0-9A-F-]{36}')
           xcrun simctl boot "$UDID" || true
           xcrun simctl list devices booted
 
