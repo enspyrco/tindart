@@ -53,8 +53,9 @@ class _HomeScreenState extends State<HomeScreen> {
     cards.clear();
     _cardDocIds.clear(); // Clear the doc IDs for new batch
 
-    List<String> ids = _docIds.sublist(_index, _index + 5);
-    _index = _index + 5;
+    final endIndex = (_index + 5).clamp(0, _docIds.length);
+    List<String> ids = _docIds.sublist(_index, endIndex);
+    _index = endIndex;
     if (_index >= _docIds.length) _index = 0;
 
     // Retrieve all `images` documents where the document's id is in the `ids`
@@ -119,13 +120,16 @@ class _HomeScreenState extends State<HomeScreen> {
               onSwipe: (previousIndex, currentIndex, direction) async {
                 if (currentIndex == 5) {
                   _retrieveNextImages();
+                  return true;
                 } else {
+                  final userId = FirebaseAuth.instance.currentUser?.uid;
+                  if (userId == null) return true;
+
                   if (currentIndex != null &&
                       currentIndex < _cardDocIds.length &&
                       direction == CardSwiperDirection.left) {
                     try {
                       final docId = _cardDocIds[currentIndex];
-                      final userId = FirebaseAuth.instance.currentUser!.uid;
 
                       await Future.wait([
                         FirebaseFirestore.instance
@@ -154,7 +158,6 @@ class _HomeScreenState extends State<HomeScreen> {
                       direction == CardSwiperDirection.right) {
                     try {
                       final docId = _cardDocIds[currentIndex];
-                      final userId = FirebaseAuth.instance.currentUser!.uid;
 
                       await Future.wait([
                         FirebaseFirestore.instance
