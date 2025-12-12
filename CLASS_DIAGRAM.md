@@ -1,6 +1,7 @@
 # TindArt Class Diagram
 
 ## Overview
+
 This diagram shows the class structure and relationships in the TindArt application, a Flutter/Dart mobile app for discovering and rating artwork through a Tinder-like swiping interface.
 
 ```mermaid
@@ -162,14 +163,17 @@ classDiagram
 ## Architecture Patterns
 
 ### Service Locator Pattern
+
 The app uses a custom `Locator` class for dependency injection:
+
 - Services are registered in `main.dart`
 - Accessed globally via `locate<T>()` function
 - Provides type-safe service retrieval
 
 ### Layer Architecture
 
-```
+```sh
+
 ┌─────────────────────────────────────┐
 │         UI Layer (Screens)          │
 │  SignInScreen, HomeScreen, etc.     │
@@ -195,14 +199,16 @@ The app uses a custom `Locator` class for dependency injection:
 ## Key Data Flows
 
 ### Authentication Flow
-```
+
+```sh
 SignInScreen → AuthService → Firebase Auth → main.dart Router
                                               ├─→ OnboardingScreen (first time)
                                               └─→ HomeScreen (returning user)
 ```
 
 ### Swipe & Comment Flow
-```
+
+```sh
 HomeScreen → FlipCard (double-tap) → CardBack → CommentsWidget
                                                       ├─→ UsersService (get username)
                                                       └─→ CommentsService (add/stream comments)
@@ -210,7 +216,8 @@ HomeScreen → FlipCard (double-tap) → CardBack → CommentsWidget
 ```
 
 ### Profile Management Flow
-```
+
+```sh
 ProfileScreen ─→ UsersService ─→ Firestore (read/write profile)
               └─→ AuthService ─→ Firestore (get user data)
 ```
