@@ -84,6 +84,24 @@ jobs:
           echo "Verifying user document..."
           curl -s "http://localhost:8080/v1/projects/tindart-8c83b/databases/(default)/documents/users/${USER_UID}"
 
+          # Seed doc-id-lists collection (required by home screen)
+          echo "Seeding doc-id-lists..."
+          curl -s -X PATCH "http://localhost:8080/v1/projects/tindart-8c83b/databases/(default)/documents/doc-id-lists/RMCevRY4dGpUTTcrltun" \
+            -H "Content-Type: application/json" \
+            -d '{"fields":{"ids":{"arrayValue":{"values":[{"stringValue":"test-image-1"},{"stringValue":"test-image-2"},{"stringValue":"test-image-3"}]}}}}'
+
+          # Seed image-docs collection with test images
+          echo "Seeding image-docs..."
+          curl -s -X PATCH "http://localhost:8080/v1/projects/tindart-8c83b/databases/(default)/documents/image-docs/test-image-1" \
+            -H "Content-Type: application/json" \
+            -d '{"fields":{"name":{"stringValue":"test-placeholder-1.jpg"}}}'
+          curl -s -X PATCH "http://localhost:8080/v1/projects/tindart-8c83b/databases/(default)/documents/image-docs/test-image-2" \
+            -H "Content-Type: application/json" \
+            -d '{"fields":{"name":{"stringValue":"test-placeholder-2.jpg"}}}'
+          curl -s -X PATCH "http://localhost:8080/v1/projects/tindart-8c83b/databases/(default)/documents/image-docs/test-image-3" \
+            -H "Content-Type: application/json" \
+            -d '{"fields":{"name":{"stringValue":"test-placeholder-3.jpg"}}}'
+
       - name: Build APK for testing (with emulator)
         run: flutter build apk --debug --dart-define=USE_FIREBASE_EMULATOR=true
         env:
@@ -186,6 +204,24 @@ jobs:
           # Verify user document was created
           echo "Verifying user document..."
           curl -s "http://localhost:8080/v1/projects/tindart-8c83b/databases/(default)/documents/users/${USER_UID}"
+
+          # Seed doc-id-lists collection (required by home screen)
+          echo "Seeding doc-id-lists..."
+          curl -s -X PATCH "http://localhost:8080/v1/projects/tindart-8c83b/databases/(default)/documents/doc-id-lists/RMCevRY4dGpUTTcrltun" \
+            -H "Content-Type: application/json" \
+            -d '{"fields":{"ids":{"arrayValue":{"values":[{"stringValue":"test-image-1"},{"stringValue":"test-image-2"},{"stringValue":"test-image-3"}]}}}}'
+
+          # Seed image-docs collection with test images
+          echo "Seeding image-docs..."
+          curl -s -X PATCH "http://localhost:8080/v1/projects/tindart-8c83b/databases/(default)/documents/image-docs/test-image-1" \
+            -H "Content-Type: application/json" \
+            -d '{"fields":{"name":{"stringValue":"test-placeholder-1.jpg"}}}'
+          curl -s -X PATCH "http://localhost:8080/v1/projects/tindart-8c83b/databases/(default)/documents/image-docs/test-image-2" \
+            -H "Content-Type: application/json" \
+            -d '{"fields":{"name":{"stringValue":"test-placeholder-2.jpg"}}}'
+          curl -s -X PATCH "http://localhost:8080/v1/projects/tindart-8c83b/databases/(default)/documents/image-docs/test-image-3" \
+            -H "Content-Type: application/json" \
+            -d '{"fields":{"name":{"stringValue":"test-placeholder-3.jpg"}}}'
 
       - name: Install Maestro
         run: |
