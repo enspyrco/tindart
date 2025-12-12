@@ -9,13 +9,14 @@ import 'package:http/http.dart' as http;
 import 'package:path_provider/path_provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:tindart/auth/auth_service.dart';
+import 'package:tindart/cards/web_detection_sheet.dart';
 import 'package:tindart/comments/comments_widget.dart';
 import 'package:tindart/utils/locator.dart';
 
 const _storageBaseUrl =
     'https://storage.googleapis.com/tindart-8c83b.firebasestorage.app';
 
-enum _MenuAction { signOut, deleteAccount, profile, setWallpaper }
+enum _MenuAction { signOut, deleteAccount, profile, setWallpaper, webDetection }
 
 class CardBack extends StatefulWidget {
   const CardBack({required this.fileName, super.key});
@@ -29,6 +30,7 @@ class CardBack extends StatefulWidget {
 class _CardBackState extends State<CardBack> {
   bool _deleting = false;
   bool _settingWallpaper = false;
+  bool _searchingWeb = false;
 
   Future<void> _signOut() async {
     // SharedPreferences.getInstance().then((prefs) {
@@ -276,6 +278,54 @@ class _CardBackState extends State<CardBack> {
     }
   }
 
+  Future<void> _showWebDetectionResults() async {
+    final imageUrl = '$_storageBaseUrl/${widget.fileName}';
+    setState(() {
+      _searchingWeb = true;
+    });
+
+    try {
+      final result = await FirebaseFunctions.instance
+          .httpsCallable('detectWeb')
+          .call({'imageUrl': imageUrl});
+
+      if (!mounted) return;
+
+      setState(() {
+        _searchingWeb = false;
+      });
+
+      final responseData = Map<String, dynamic>.from(result.data as Map);
+      final data = responseData['data'] != null
+          ? Map<String, dynamic>.from(responseData['data'] as Map)
+          : null;
+      if (data == null) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('No web detection results found')),
+        );
+        return;
+      }
+
+      showModalBottomSheet(
+        context: context,
+        isScrollControlled: true,
+        builder: (sheetContext) => WebDetectionSheet(data: data),
+      );
+    } catch (e) {
+      setState(() {
+        _searchingWeb = false;
+      });
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Error: ${e.toString()}'),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -294,6 +344,8 @@ class _CardBackState extends State<CardBack> {
                   context.push('/profile');
                 case _MenuAction.setWallpaper:
                   _showWallpaperConfirmation(context);
+                case _MenuAction.webDetection:
+                  _showWebDetectionResults();
               }
             },
             itemBuilder: (BuildContext context) => [
@@ -319,6 +371,16 @@ class _CardBackState extends State<CardBack> {
                   ],
                 ),
               ),
+              const PopupMenuItem(
+                value: _MenuAction.webDetection,
+                child: Row(
+                  children: [
+                    Icon(Icons.image_search, size: 20),
+                    SizedBox(width: 8),
+                    Text('Find Similar'),
+                  ],
+                ),
+              ),
             ],
           ),
         ],
@@ -326,7 +388,7 @@ class _CardBackState extends State<CardBack> {
       body: Stack(
         children: [
           Center(child: CommentsWidget(imageId: widget.fileName)),
-          if (_deleting || _settingWallpaper)
+          if (_deleting || _settingWallpaper || _searchingWeb)
             Container(
               color: Colors.black54,
               child: const Center(child: CircularProgressIndicator()),
