@@ -125,8 +125,18 @@ jobs:
           arch: x86_64
           profile: pixel_6
           script: |
+            # Verify Firebase emulators are still running
+            echo "Verifying Firebase emulators..."
+            curl -s http://localhost:9099/ || echo "WARNING: Auth emulator not accessible"
+            curl -s http://localhost:8080/ || echo "WARNING: Firestore emulator not accessible"
+            # Verify test data exists
+            echo "Verifying test data..."
+            curl -s "http://localhost:8080/v1/projects/tindart-8c83b/databases/(default)/documents/doc-id-lists/RMCevRY4dGpUTTcrltun"
+            # Install and run
             adb install build/app/outputs/flutter-apk/app-debug.apk
             mkdir -p screenshots
+            # Add delay for app to fully initialize
+            sleep 5
             maestro test .maestro/screenshots.yaml
 
       - name: Upload Screenshots

@@ -9,16 +9,19 @@ appId: co.enspyr.tindart
 # Launch the app
 - launchApp
 
-# Wait for app to load
-- waitForAnimationToEnd
+# Give app time to initialize Firebase and sign in
+- extendedWaitUntil:
+    visible: ".*"
+    timeout: 10000
 
 # Debug: capture initial screen state
 - takeScreenshot: screenshots/00_debug_initial
 
 # Wait for home screen to appear (with TindArt title)
+# The app needs to: connect to emulator, sign in, load data from Firestore
 - extendedWaitUntil:
     visible: "TindArt"
-    timeout: 60000
+    timeout: 120000
 
 # 1. Home screen with cards
 - takeScreenshot: screenshots/01_home_screen
