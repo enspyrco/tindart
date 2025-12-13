@@ -333,6 +333,7 @@ class _CardBackState extends State<CardBack> {
             identifier: 'menu',
             button: true,
             child: PopupMenuButton<_MenuAction>(
+              tooltip: 'menu',
               icon: const Icon(Icons.more_vert),
               onSelected: (action) {
                 switch (action) {
