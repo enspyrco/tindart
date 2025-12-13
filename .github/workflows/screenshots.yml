@@ -116,7 +116,16 @@ jobs:
 
       - name: Install Maestro
         run: |
-          curl -Ls "https://get.maestro.mobile.dev" | bash
+          # Try installing with retries (the CDN can be flaky)
+          for i in 1 2 3; do
+            echo "Attempt $i to install Maestro..."
+            if curl -fsSL "https://get.maestro.mobile.dev" -o maestro_install.sh && head -1 maestro_install.sh | grep -q "#!/"; then
+              bash maestro_install.sh
+              break
+            fi
+            echo "Download failed or returned HTML, retrying in 10s..."
+            sleep 10
+          done
           echo "$HOME/.maestro/bin" >> $GITHUB_PATH
 
       - name: Enable KVM
@@ -143,6 +152,12 @@ jobs:
             # Install and run
             adb install build/app/outputs/flutter-apk/app-debug.apk
             mkdir -p screenshots
+            # Clear any cached Maestro state
+            rm -rf ~/.maestro/tests/* 2>/dev/null || true
+            # Debug: show the actual flow file being used
+            echo "=== Contents of .maestro/screenshots.yaml ==="
+            cat .maestro/screenshots.yaml
+            echo "============================================="
             # Start capturing logcat in background for debugging
             adb logcat -c  # Clear logcat
             adb logcat > logcat.txt 2>&1 &
@@ -269,7 +284,16 @@ jobs:
 
       - name: Install Maestro
         run: |
-          curl -Ls "https://get.maestro.mobile.dev" | bash
+          # Try installing with retries (the CDN can be flaky)
+          for i in 1 2 3; do
+            echo "Attempt $i to install Maestro..."
+            if curl -fsSL "https://get.maestro.mobile.dev" -o maestro_install.sh && head -1 maestro_install.sh | grep -q "#!/"; then
+              bash maestro_install.sh
+              break
+            fi
+            echo "Download failed or returned HTML, retrying in 10s..."
+            sleep 10
+          done
           echo "$HOME/.maestro/bin" >> $GITHUB_PATH
 
       - name: Boot iOS Simulator
@@ -288,6 +312,12 @@ jobs:
       - name: Run Maestro Screenshots
         run: |
           mkdir -p screenshots
+          # Clear any cached Maestro state
+          rm -rf ~/.maestro/tests/* 2>/dev/null || true
+          # Debug: show the actual flow file being used
+          echo "=== Contents of .maestro/screenshots.yaml ==="
+          cat .maestro/screenshots.yaml
+          echo "============================================="
           maestro test .maestro/screenshots.yaml
 
       - name: Upload Screenshots
