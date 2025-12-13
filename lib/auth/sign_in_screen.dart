@@ -15,6 +15,17 @@ class SignInScreen extends StatefulWidget {
 class _SignInScreenState extends State<SignInScreen> {
   bool isSigningIn = false;
 
+  @override
+  void initState() {
+    super.initState();
+    // Redirect if already signed in (e.g., emulator auto-login)
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (locate<AuthService>().currentUserId != null && mounted) {
+        context.go('/');
+      }
+    });
+  }
+
   Future<void> _signInWithApple(BuildContext context) async {
     setState(() {
       isSigningIn = true;
