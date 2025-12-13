@@ -6,31 +6,11 @@ appId: co.enspyr.tindart
 # Requires: App built with --dart-define=USE_FIREBASE_EMULATOR=true
 # and Firebase emulators running with test user created.
 
-# Launch the app
+# Launch app and wait for home screen (menu button visible = ready)
 - launchApp
-
-# Give app time to initialize Firebase and sign in
 - extendedWaitUntil:
-    visible: ".*"
-    timeout: 10000
-
-# Debug: capture initial screen state
-- takeScreenshot: screenshots/00_debug_initial
-
-# Wait for home screen to load
-# The app needs to: connect to emulator, sign in, load data from Firestore
-- extendedWaitUntil:
-    visible: ".*"
+    visible: "menu.*"
     timeout: 30000
-- runFlow:
-    when:
-      platform: Android
-    commands:
-      # On Android, wait longer for images to load
-      - swipe:
-          direction: DOWN
-          duration: 100
-      - waitForAnimationToEnd
 
 # 1. Home screen with cards
 - takeScreenshot: screenshots/01_home_screen
