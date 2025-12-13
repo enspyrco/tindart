@@ -81,6 +81,31 @@ class _HomeScreenState extends State<HomeScreen> {
               height: double.infinity,
               child: Image.network(
                 'https://storage.googleapis.com/tindart-8c83b.firebasestorage.app/$fileName',
+                loadingBuilder: (context, child, loadingProgress) {
+                  if (loadingProgress == null) return child;
+                  return Center(
+                    child: CircularProgressIndicator(
+                      value: loadingProgress.expectedTotalBytes != null
+                          ? loadingProgress.cumulativeBytesLoaded /
+                              loadingProgress.expectedTotalBytes!
+                          : null,
+                    ),
+                  );
+                },
+                errorBuilder: (context, error, stackTrace) {
+                  log('Image load error: $error');
+                  return Center(
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        const Icon(Icons.error, color: Colors.red, size: 48),
+                        const SizedBox(height: 8),
+                        Text('Failed to load image',
+                            style: TextStyle(color: Colors.red[700])),
+                      ],
+                    ),
+                  );
+                },
               ),
             ),
           ),
