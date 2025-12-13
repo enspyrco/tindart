@@ -45,7 +45,7 @@ appId: co.enspyr.tindart
 # Disable retry to prevent double-tap selecting first menu item
 - tapOn:
     text: "menu.*"
-    retryIfNoChange: false
+    retryTapIfNoChange: false
 - waitForAnimationToEnd
 - takeScreenshot: screenshots/03_menu_open
 
