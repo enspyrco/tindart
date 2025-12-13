@@ -116,17 +116,11 @@ jobs:
 
       - name: Install Maestro
         run: |
-          # Try installing with retries (the CDN can be flaky)
-          for i in 1 2 3; do
-            echo "Attempt $i to install Maestro..."
-            if curl -fsSL "https://get.maestro.mobile.dev" -o maestro_install.sh && head -1 maestro_install.sh | grep -q "#!/"; then
-              bash maestro_install.sh
-              break
-            fi
-            echo "Download failed or returned HTML, retrying in 10s..."
-            sleep 10
-          done
-          echo "$HOME/.maestro/bin" >> $GITHUB_PATH
+          MAESTRO_VERSION="1.39.13"
+          echo "Installing Maestro $MAESTRO_VERSION from GitHub releases..."
+          curl -fsSL "https://github.com/mobile-dev-inc/maestro/releases/download/cli-${MAESTRO_VERSION}/maestro.zip" -o maestro.zip
+          unzip -q maestro.zip -d "$HOME"
+          echo "$HOME/maestro/bin" >> $GITHUB_PATH
 
       - name: Enable KVM
         run: |
@@ -167,7 +161,7 @@ jobs:
             # Wait for app to initialize and sign in (with retries)
             sleep 10
             # Run Maestro tests (use full path since GITHUB_PATH isn't available in this shell)
-            $HOME/.maestro/bin/maestro test .maestro/screenshots.yaml || true
+            $HOME/maestro/bin/maestro test .maestro/screenshots.yaml || true
             # Stop logcat and save
             kill $LOGCAT_PID || true
             # Show relevant logs
@@ -284,17 +278,11 @@ jobs:
 
       - name: Install Maestro
         run: |
-          # Try installing with retries (the CDN can be flaky)
-          for i in 1 2 3; do
-            echo "Attempt $i to install Maestro..."
-            if curl -fsSL "https://get.maestro.mobile.dev" -o maestro_install.sh && head -1 maestro_install.sh | grep -q "#!/"; then
-              bash maestro_install.sh
-              break
-            fi
-            echo "Download failed or returned HTML, retrying in 10s..."
-            sleep 10
-          done
-          echo "$HOME/.maestro/bin" >> $GITHUB_PATH
+          MAESTRO_VERSION="1.39.13"
+          echo "Installing Maestro $MAESTRO_VERSION from GitHub releases..."
+          curl -fsSL "https://github.com/mobile-dev-inc/maestro/releases/download/cli-${MAESTRO_VERSION}/maestro.zip" -o maestro.zip
+          unzip -q maestro.zip -d "$HOME"
+          echo "$HOME/maestro/bin" >> $GITHUB_PATH
 
       - name: Boot iOS Simulator
         run: |
