@@ -329,57 +329,61 @@ class _CardBackState extends State<CardBack> {
       appBar: AppBar(
         title: const Text('TindArt'),
         actions: [
-          PopupMenuButton<_MenuAction>(
-            icon: const Icon(Icons.more_vert, semanticLabel: 'menu'),
-            tooltip: 'Menu',
-            onSelected: (action) {
-              switch (action) {
-                case _MenuAction.signOut:
-                  _signOut();
-                case _MenuAction.deleteAccount:
-                  if (!_deleting) _showDeleteConfirmation(context);
-                case _MenuAction.profile:
-                  context.push('/profile');
-                case _MenuAction.setWallpaper:
-                  _showWallpaperConfirmation(context);
-                case _MenuAction.webDetection:
-                  _showWebDetectionResults();
-              }
-            },
-            itemBuilder: (BuildContext context) => [
-              const PopupMenuItem(
-                value: _MenuAction.signOut,
-                child: Text('Sign Out'),
-              ),
-              const PopupMenuItem(
-                value: _MenuAction.deleteAccount,
-                child: Text('Delete Account'),
-              ),
-              const PopupMenuItem(
-                value: _MenuAction.profile,
-                child: Text('Profile'),
-              ),
-              const PopupMenuItem(
-                value: _MenuAction.setWallpaper,
-                child: Row(
-                  children: [
-                    Icon(Icons.wallpaper, size: 20),
-                    SizedBox(width: 8),
-                    Text('Set as Wallpaper'),
-                  ],
+          Semantics(
+            label: 'menu',
+            button: true,
+            child: PopupMenuButton<_MenuAction>(
+              icon: const Icon(Icons.more_vert),
+              tooltip: 'Menu',
+              onSelected: (action) {
+                switch (action) {
+                  case _MenuAction.signOut:
+                    _signOut();
+                  case _MenuAction.deleteAccount:
+                    if (!_deleting) _showDeleteConfirmation(context);
+                  case _MenuAction.profile:
+                    context.push('/profile');
+                  case _MenuAction.setWallpaper:
+                    _showWallpaperConfirmation(context);
+                  case _MenuAction.webDetection:
+                    _showWebDetectionResults();
+                }
+              },
+              itemBuilder: (BuildContext context) => [
+                const PopupMenuItem(
+                  value: _MenuAction.signOut,
+                  child: Text('Sign Out'),
                 ),
-              ),
-              const PopupMenuItem(
-                value: _MenuAction.webDetection,
-                child: Row(
-                  children: [
-                    Icon(Icons.image_search, size: 20),
-                    SizedBox(width: 8),
-                    Text('Find Similar'),
-                  ],
+                const PopupMenuItem(
+                  value: _MenuAction.deleteAccount,
+                  child: Text('Delete Account'),
                 ),
-              ),
-            ],
+                const PopupMenuItem(
+                  value: _MenuAction.profile,
+                  child: Text('Profile'),
+                ),
+                const PopupMenuItem(
+                  value: _MenuAction.setWallpaper,
+                  child: Row(
+                    children: [
+                      Icon(Icons.wallpaper, size: 20),
+                      SizedBox(width: 8),
+                      Text('Set as Wallpaper'),
+                    ],
+                  ),
+                ),
+                const PopupMenuItem(
+                  value: _MenuAction.webDetection,
+                  child: Row(
+                    children: [
+                      Icon(Icons.image_search, size: 20),
+                      SizedBox(width: 8),
+                      Text('Find Similar'),
+                    ],
+                  ),
+                ),
+              ],
+            ),
           ),
         ],
       ),
