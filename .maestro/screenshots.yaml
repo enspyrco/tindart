@@ -6,11 +6,14 @@ appId: co.enspyr.tindart
 # Requires: App built with --dart-define=USE_FIREBASE_EMULATOR=true
 # and Firebase emulators running with test user created.
 
-# Launch app and wait for home screen (menu button visible = ready)
+# Launch app and wait for home screen to load
 - launchApp
+# Wait for the app to initialize, sign in, and load cards
+# The home screen shows CircularProgressIndicator while loading,
+# then displays the CardSwiper with images
 - extendedWaitUntil:
-    visible: "menu.*"
-    timeout: 30000
+    notVisible: "CircularProgressIndicator"
+    timeout: 45000
 
 # 1. Home screen with cards
 - takeScreenshot: screenshots/01_home_screen
