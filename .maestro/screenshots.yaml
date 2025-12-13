@@ -26,7 +26,7 @@ appId: co.enspyr.tindart
 
 # 3. Tap menu button (top-right corner of AppBar)
 - tapOn:
-    point: "95%,8%"
+    point: "93%,4%"
 - waitForAnimationToEnd
 - takeScreenshot: screenshots/03_menu_open
 
