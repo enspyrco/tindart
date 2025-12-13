@@ -32,10 +32,19 @@ platform :android do
 end
 
 # ==================== iOS ====================
+
+api_key = app_store_connect_api_key(
+  key_id: ENV["ASC_KEY_ID"],
+  issuer_id: ENV["ASC_ISSUER_ID"],
+  key_content: ENV["ASC_PRIVATE_KEY"],
+  is_key_content_base64: false
+)
+
 platform :ios do
   desc "Upload screenshots to App Store Connect"
   lane :upload_screenshots do
     deliver(
+      api_key: api_key,
       skip_binary_upload: true,
       skip_metadata: true,
       skip_app_version_update: true,
@@ -47,6 +56,7 @@ platform :ios do
   desc "Upload metadata only (description, title, etc.)"
   lane :upload_metadata do
     deliver(
+      api_key: api_key,
       skip_binary_upload: true,
       skip_screenshots: true,
       skip_app_version_update: true,
