@@ -330,11 +330,10 @@ class _CardBackState extends State<CardBack> {
         title: const Text('TindArt'),
         actions: [
           Semantics(
-            label: 'menu',
+            identifier: 'menu',
             button: true,
             child: PopupMenuButton<_MenuAction>(
               icon: const Icon(Icons.more_vert),
-              tooltip: 'Menu',
               onSelected: (action) {
                 switch (action) {
                   case _MenuAction.signOut:
