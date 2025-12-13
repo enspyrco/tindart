@@ -51,7 +51,12 @@ jobs:
           node-version: '20'
 
       - name: Install Firebase CLI
-        run: npm install -g firebase-tools
+        run: |
+          for i in 1 2 3; do
+            npm install -g firebase-tools && break
+            echo "Retry $i..."
+            sleep 5
+          done
 
       - name: Build Cloud Functions
         run: |
@@ -225,7 +230,12 @@ jobs:
           node-version: '20'
 
       - name: Install Firebase CLI
-        run: npm install -g firebase-tools
+        run: |
+          for i in 1 2 3; do
+            npm install -g firebase-tools && break
+            echo "Retry $i..."
+            sleep 5
+          done
 
       - name: Build Cloud Functions
         run: |
