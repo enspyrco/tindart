@@ -166,8 +166,8 @@ jobs:
             adb shell am start -n co.enspyr.tindart/.MainActivity
             # Wait for app to initialize and sign in (with retries)
             sleep 10
-            # Run Maestro tests
-            maestro test .maestro/screenshots.yaml || true
+            # Run Maestro tests (use full path since GITHUB_PATH isn't available in this shell)
+            $HOME/.maestro/bin/maestro test .maestro/screenshots.yaml || true
             # Stop logcat and save
             kill $LOGCAT_PID || true
             # Show relevant logs
