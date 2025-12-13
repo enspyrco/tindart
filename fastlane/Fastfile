@@ -5,6 +5,7 @@ platform :android do
   desc "Upload screenshots to Google Play Store"
   lane :upload_screenshots do
     upload_to_play_store(
+      package_name: "co.enspyr.tindart",
       json_key_data: ENV["PLAY_STORE_JSON_KEY"],
       skip_upload_apk: true,
       skip_upload_aab: true,
@@ -18,6 +19,7 @@ platform :android do
   desc "Upload metadata only (description, title, etc.)"
   lane :upload_metadata do
     upload_to_play_store(
+      package_name: "co.enspyr.tindart",
       json_key_data: ENV["PLAY_STORE_JSON_KEY"],
       skip_upload_apk: true,
       skip_upload_aab: true,

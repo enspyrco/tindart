@@ -24,11 +24,9 @@ appId: co.enspyr.tindart
 - waitForAnimationToEnd
 - takeScreenshot: screenshots/02_card_back
 
-# 3. Tap menu button (using accessibility label regex)
+# 3. Tap menu button (using tooltip text)
 # Disable retry to prevent double-tap selecting first menu item
-- tapOn:
-    text: "menu.*"
-    retryTapIfNoChange: false
+- tapOn: Menu
 - waitForAnimationToEnd
 - takeScreenshot: screenshots/03_menu_open
 
