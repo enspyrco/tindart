@@ -3,12 +3,19 @@
 <plist version="1.0">
 <dict>
     <key>method</key>
-    <string>app-store</string>
+    <string>app-store-connect</string>
     <key>teamID</key>
     <string>SPL85G447K</string>
     <key>uploadSymbols</key>
     <true/>
     <key>compileBitcode</key>
     <false/>
+    <key>signingStyle</key>
+    <string>manual</string>
+    <key>provisioningProfiles</key>
+    <dict>
+        <key>co.enspyr.tindart</key>
+        <string>TindArt App Store</string>
+    </dict>
 </dict>
 </plist>

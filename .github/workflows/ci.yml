@@ -198,13 +198,37 @@ jobs:
           security set-key-partition-list -S apple-tool:,apple: -k "$KEYCHAIN_PASSWORD" $KEYCHAIN_PATH
           security list-keychain -d user -s $KEYCHAIN_PATH
 
-          # Install provisioning profile
+          # Install provisioning profile with its UUID as filename
           mkdir -p ~/Library/MobileDevice/Provisioning\ Profiles
-          PROFILE_PATH=~/Library/MobileDevice/Provisioning\ Profiles/profile.mobileprovision
+          PROFILE_PATH=$RUNNER_TEMP/profile.mobileprovision
           echo -n "$IOS_PROVISIONING_PROFILE_BASE64" | base64 --decode -o "$PROFILE_PATH"
 
-      - name: Build iOS IPA
-        run: flutter build ipa --release --export-options-plist=ios/ExportOptions.plist
+          # Extract UUID from profile and copy with correct name
+          PROFILE_UUID=$(/usr/libexec/PlistBuddy -c "Print UUID" /dev/stdin <<< $(security cms -D -i "$PROFILE_PATH"))
+          cp "$PROFILE_PATH" ~/Library/MobileDevice/Provisioning\ Profiles/"$PROFILE_UUID".mobileprovision
+
+      - name: Generate Flutter iOS build files
+        run: flutter build ios --config-only --release --no-codesign
+
+      - name: Build iOS archive
+        run: |
+          cd ios
+          xcodebuild -workspace Runner.xcworkspace \
+            -scheme Runner \
+            -configuration Release \
+            -archivePath $RUNNER_TEMP/Runner.xcarchive \
+            -sdk iphoneos \
+            -destination 'generic/platform=iOS' \
+            archive \
+            CODE_SIGN_STYLE=Manual \
+            CODE_SIGN_IDENTITY="Apple Distribution"
+
+      - name: Export IPA
+        run: |
+          xcodebuild -exportArchive \
+            -archivePath $RUNNER_TEMP/Runner.xcarchive \
+            -exportOptionsPlist ios/ExportOptions.plist \
+            -exportPath build/ios/ipa
 
       - name: Upload to App Store Connect
         env:
