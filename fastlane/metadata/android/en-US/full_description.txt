@@ -1,0 +1,8 @@
+TindArt lets you discover art through an intuitive swipe interface. Like or dislike artwork with a simple gesture, and find similar pieces with reverse image search.
+
+Features:
+- Swipe right to like, left to dislike
+- Double-tap to flip cards and see details
+- Find similar artwork with web detection
+- Set your favorite art as wallpaper
+- Clean, distraction-free interface
