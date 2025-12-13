@@ -19,10 +19,8 @@ jobs:
         uses: subosito/flutter-action@v2
         with:
           channel: stable
-          flutter-version-file: pubspec.yaml # path to pubspec.yaml
+          flutter-version-file: pubspec.yaml
           cache: true
-
-      - run: flutter --version
 
       - name: Install dependencies
         run: flutter pub get
@@ -104,11 +102,20 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
+      - name: Setup Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'zulu'
+          java-version: '21'
+
+      - name: Setup Gradle
+        uses: gradle/actions/setup-gradle@v4
+
       - name: Setup Flutter
         uses: subosito/flutter-action@v2
         with:
           channel: stable
-          flutter-version-file: pubspec.yaml # path to pubspec.yaml
+          flutter-version-file: pubspec.yaml
           cache: true
 
       - name: Install dependencies
@@ -152,23 +159,23 @@ jobs:
         uses: subosito/flutter-action@v2
         with:
           channel: stable
-          flutter-version-file: pubspec.yaml # path to pubspec.yaml
+          flutter-version-file: pubspec.yaml
           cache: true
 
       - name: Install dependencies
         run: flutter pub get
 
-      - name: Install flutterfire CLI
-        run: |
-          dart pub global activate flutterfire_cli
-          echo "$HOME/.pub-cache/bin" >> $GITHUB_PATH
+      - name: Cache CocoaPods
+        uses: actions/cache@v4
+        with:
+          path: ios/Pods
+          key: pods-${{ hashFiles('ios/Podfile.lock') }}
+          restore-keys: pods-
 
       - name: Setup CocoaPods
         run: |
           export LANG=en_US.UTF-8
-          cd ios
-          pod repo update
-          pod install
+          cd ios && pod install
 
       - name: Build iOS (no codesign)
         run: flutter build ios --release --no-codesign
