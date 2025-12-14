@@ -19,9 +19,10 @@ const _storageBaseUrl =
 enum _MenuAction { signOut, deleteAccount, profile, setWallpaper, webDetection }
 
 class CardBack extends StatefulWidget {
-  const CardBack({required this.fileName, super.key});
+  const CardBack({required this.fileName, required this.docId, super.key});
 
   final String fileName;
+  final String docId;
 
   @override
   State<CardBack> createState() => _CardBackState();
@@ -276,15 +277,15 @@ class _CardBackState extends State<CardBack> {
   }
 
   Future<void> _showWebDetectionResults() async {
-    final imageUrl = '$_storageBaseUrl/${widget.fileName}';
     setState(() {
       _searchingWeb = true;
     });
 
     try {
+      // Use imageDocId for caching support
       final result = await FirebaseFunctions.instance
           .httpsCallable('detectWeb')
-          .call({'imageUrl': imageUrl});
+          .call({'imageDocId': widget.docId});
 
       if (!mounted) return;
 
