@@ -14,6 +14,7 @@ import 'package:tindart/comments/comments_service.dart';
 import 'package:tindart/firebase_options.dart';
 import 'package:tindart/home_screen.dart';
 import 'package:tindart/onboarding/onboarding_screen.dart';
+import 'package:tindart/onboarding/welcome_screen.dart';
 import 'package:tindart/onboarding/privacy_policy_screen.dart';
 import 'package:tindart/users/profile_screen.dart';
 import 'package:tindart/users/users_service.dart';
@@ -21,7 +22,7 @@ import 'package:tindart/utils/locator.dart';
 
 final _router = GoRouter(
   initialLocation:
-      locate<AuthService>().currentUserId == null ? '/signin' : '/',
+      locate<AuthService>().currentUserId == null ? '/welcome' : '/',
   routes: [
     GoRoute(
       name: 'home',
@@ -35,6 +36,11 @@ final _router = GoRouter(
           return null;
         }
       },
+    ),
+    GoRoute(
+      name: 'welcome',
+      path: '/welcome',
+      builder: (context, state) => const WelcomeScreen(),
     ),
     GoRoute(
       name: 'signin',
