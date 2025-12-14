@@ -42,10 +42,18 @@ class _SignInScreenState extends State<SignInScreen> {
       isSigningIn = true;
     });
 
-    await locate<AuthService>().signInWithGoogle();
+    try {
+      await locate<AuthService>().signInWithGoogle();
 
-    if (context.mounted) {
-      context.go('/');
+      if (context.mounted) {
+        context.go('/');
+      }
+    } catch (e) {
+      if (mounted) {
+        setState(() {
+          isSigningIn = false;
+        });
+      }
     }
   }
 
