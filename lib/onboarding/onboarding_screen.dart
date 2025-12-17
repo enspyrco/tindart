@@ -107,7 +107,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
         child: Stack(
           children: [
             // Top section with checkbox and text with link
-            Padding(
+            SingleChildScrollView(
               padding: const EdgeInsets.all(24.0),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -193,6 +193,8 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                       ),
                     ],
                   ),
+                  // Add bottom padding to prevent content from being hidden behind button
+                  const SizedBox(height: 80),
                 ],
               ),
             ),
