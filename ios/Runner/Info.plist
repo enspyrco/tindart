@@ -49,5 +49,7 @@
 	<false/>
 	<key>NSPhotoLibraryAddUsageDescription</key>
 	<string>TindArt needs access to save artwork images to your Photos library so you can set them as wallpaper.</string>
+	<key>NSPhotoLibraryUsageDescription</key>
+	<string>TindArt needs access to your Photos library to save artwork images to an album.</string>
 </dict>
 </plist>
