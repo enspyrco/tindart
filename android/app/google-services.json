@@ -22,6 +22,22 @@
           }
         },
         {
+          "client_id": "498580446520-l56r328dkl76a40n7h2vlhgj6md6niho.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "co.enspyr.tindart",
+            "certificate_hash": "b838232bcb53c7f92e83cab45aa3f445e53514ba"
+          }
+        },
+        {
+          "client_id": "498580446520-m9ocud2t9jnmuerbkl6oqcsvgpfv7934.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "co.enspyr.tindart",
+            "certificate_hash": "20d69ef57e761b40e3bc8deb0908ff8e95caa1b2"
+          }
+        },
+        {
           "client_id": "498580446520-1k97o45ftqc7htv00ahio8jmrmqcfp6q.apps.googleusercontent.com",
           "client_type": 3
         }
