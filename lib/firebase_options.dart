@@ -17,10 +17,7 @@ import 'package:flutter/foundation.dart'
 class DefaultFirebaseOptions {
   static FirebaseOptions get currentPlatform {
     if (kIsWeb) {
-      throw UnsupportedError(
-        'DefaultFirebaseOptions have not been configured for web - '
-        'you can reconfigure this by running the FlutterFire CLI again.',
-      );
+      return web;
     }
     switch (defaultTargetPlatform) {
       case TargetPlatform.android:
@@ -63,10 +60,18 @@ class DefaultFirebaseOptions {
     messagingSenderId: '498580446520',
     projectId: 'tindart-8c83b',
     storageBucket: 'tindart-8c83b.firebasestorage.app',
-    androidClientId:
-        '498580446520-inqkn6pbj7e7amjqd5sp4v9adtf8ljsn.apps.googleusercontent.com',
-    iosClientId:
-        '498580446520-2ucvd1ugvn7n637bkq51vaojaofg9o8g.apps.googleusercontent.com',
+    androidClientId: '498580446520-inqkn6pbj7e7amjqd5sp4v9adtf8ljsn.apps.googleusercontent.com',
+    iosClientId: '498580446520-2ucvd1ugvn7n637bkq51vaojaofg9o8g.apps.googleusercontent.com',
     iosBundleId: 'co.enspyr.tindart',
+  );
+
+  static const FirebaseOptions web = FirebaseOptions(
+    apiKey: 'AIzaSyCp3qUnSLD_KPX9E-4-wIB3MzNSg1urj3w',
+    appId: '1:498580446520:web:3ab73dc38b951e67c135cd',
+    messagingSenderId: '498580446520',
+    projectId: 'tindart-8c83b',
+    authDomain: 'tindart-8c83b.firebaseapp.com',
+    storageBucket: 'tindart-8c83b.firebasestorage.app',
+    measurementId: 'G-JG1BPBXNH1',
   );
 }

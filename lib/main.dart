@@ -16,18 +16,31 @@ import 'package:tindart/home_screen.dart';
 import 'package:tindart/onboarding/onboarding_screen.dart';
 import 'package:tindart/onboarding/welcome_screen.dart';
 import 'package:tindart/onboarding/privacy_policy_screen.dart';
+import 'package:tindart/theme/web_theme.dart';
 import 'package:tindart/users/profile_screen.dart';
 import 'package:tindart/users/users_service.dart';
 import 'package:tindart/utils/locator.dart';
+import 'package:tindart/web/screens/web_artwork_detail_screen.dart';
+import 'package:tindart/web/screens/web_gallery_screen.dart';
+import 'package:tindart/web/screens/web_home_screen.dart';
+import 'package:tindart/web/screens/web_liked_screen.dart';
+
+String _getInitialLocation() {
+  final isAuthenticated = locate<AuthService>().currentUserId != null;
+  if (!isAuthenticated) {
+    return '/welcome';
+  }
+  return kIsWeb ? '/gallery' : '/';
+}
 
 final _router = GoRouter(
-  initialLocation:
-      locate<AuthService>().currentUserId == null ? '/welcome' : '/',
+  initialLocation: _getInitialLocation(),
   routes: [
     GoRoute(
       name: 'home',
       path: '/',
-      builder: (context, state) => const HomeScreen(),
+      builder: (context, state) =>
+          kIsWeb ? const WebHomeScreen() : const HomeScreen(),
       redirect: (BuildContext context, GoRouterState state) async {
         bool onboarded = await locate<AuthService>().userHasOnboarded;
         if (!onboarded) {
@@ -61,6 +74,31 @@ final _router = GoRouter(
       name: 'profile',
       path: '/profile',
       builder: (context, state) => const ProfileScreen(),
+    ),
+    // Web-specific routes
+    GoRoute(
+      name: 'gallery',
+      path: '/gallery',
+      builder: (context, state) => const WebGalleryScreen(),
+      redirect: (BuildContext context, GoRouterState state) async {
+        bool onboarded = await locate<AuthService>().userHasOnboarded;
+        if (!onboarded) {
+          return '/onboarding-screen';
+        }
+        return null;
+      },
+    ),
+    GoRoute(
+      name: 'artwork',
+      path: '/artwork/:id',
+      builder: (context, state) => WebArtworkDetailScreen(
+        artworkId: state.pathParameters['id']!,
+      ),
+    ),
+    GoRoute(
+      name: 'liked',
+      path: '/liked',
+      builder: (context, state) => const WebLikedScreen(),
     ),
   ],
 );
@@ -104,14 +142,17 @@ void main() async {
   }
 
   // Pass all uncaught "fatal" errors from the framework to Crashlytics
-  FlutterError.onError = (errorDetails) {
-    FirebaseCrashlytics.instance.recordFlutterFatalError(errorDetails);
-  };
-  // Pass all uncaught asynchronous errors that aren't handled by the Flutter framework to Crashlytics
-  PlatformDispatcher.instance.onError = (error, stack) {
-    FirebaseCrashlytics.instance.recordError(error, stack, fatal: true);
-    return true;
-  };
+  // Crashlytics is not supported on web
+  if (!kIsWeb) {
+    FlutterError.onError = (errorDetails) {
+      FirebaseCrashlytics.instance.recordFlutterFatalError(errorDetails);
+    };
+    // Pass all uncaught asynchronous errors that aren't handled by the Flutter framework to Crashlytics
+    PlatformDispatcher.instance.onError = (error, stack) {
+      FirebaseCrashlytics.instance.recordError(error, stack, fatal: true);
+      return true;
+    };
+  }
 
   // Setup the data layer of the "data layer architecture"
   final firestore = FirebaseFirestore.instance;
@@ -132,7 +173,11 @@ class MainApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp.router(routerConfig: _router);
+    return MaterialApp.router(
+      routerConfig: _router,
+      theme: kIsWeb ? WebTheme.theme : null,
+      debugShowCheckedModeBanner: false,
+    );
   }
 }
 
