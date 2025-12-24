@@ -66,8 +66,9 @@ class _SignInScreenState extends State<SignInScreen> {
             : Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  if (defaultTargetPlatform == TargetPlatform.iOS ||
-                      defaultTargetPlatform == TargetPlatform.macOS)
+                  if (!kIsWeb &&
+                      (defaultTargetPlatform == TargetPlatform.iOS ||
+                          defaultTargetPlatform == TargetPlatform.macOS))
                     SizedBox(
                       width: 185,
                       child: TextButton.icon(

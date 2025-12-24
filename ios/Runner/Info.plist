@@ -51,5 +51,16 @@
 	<string>TindArt needs access to save artwork images to your Photos library so you can set them as wallpaper.</string>
 	<key>NSPhotoLibraryUsageDescription</key>
 	<string>TindArt needs access to your Photos library to save artwork images to an album.</string>
+	<key>CFBundleURLTypes</key>
+	<array>
+		<dict>
+			<key>CFBundleTypeRole</key>
+			<string>Editor</string>
+			<key>CFBundleURLSchemes</key>
+			<array>
+				<string>com.googleusercontent.apps.498580446520-2ucvd1ugvn7n637bkq51vaojaofg9o8g</string>
+			</array>
+		</dict>
+	</array>
 </dict>
 </plist>

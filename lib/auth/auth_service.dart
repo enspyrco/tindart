@@ -106,4 +106,87 @@ class AuthService {
   Future<void> deleteAccount() async {
     await _auth.currentUser?.delete();
   }
+
+  /// Get list of provider IDs linked to current user (e.g., 'google.com', 'apple.com')
+  List<String> getLinkedProviders() {
+    final user = _auth.currentUser;
+    if (user == null) return [];
+    return user.providerData.map((info) => info.providerId).toList();
+  }
+
+  bool isGoogleLinked() => getLinkedProviders().contains('google.com');
+  bool isAppleLinked() => getLinkedProviders().contains('apple.com');
+
+  /// Link Google account to current user
+  Future<void> linkWithGoogle() async {
+    final user = _auth.currentUser;
+    if (user == null) throw Exception('No user signed in');
+
+    if (kIsWeb) {
+      // On web, use linkWithPopup and capture result to avoid JS interop issues
+      final googleProvider = GoogleAuthProvider();
+      final result = await user.linkWithPopup(googleProvider);
+      if (result.user == null) {
+        throw Exception('Failed to link Google account');
+      }
+    } else {
+      final googleSignIn = GoogleSignIn(
+        scopes: ['email', 'profile'],
+        serverClientId:
+            '498580446520-1k97o45ftqc7htv00ahio8jmrmqcfp6q.apps.googleusercontent.com',
+      );
+      final GoogleSignInAccount? googleUser = await googleSignIn.signIn();
+
+      if (googleUser == null) {
+        throw Exception('Google sign in was cancelled');
+      }
+
+      final GoogleSignInAuthentication googleAuth =
+          await googleUser.authentication;
+      final credential = GoogleAuthProvider.credential(
+        accessToken: googleAuth.accessToken,
+        idToken: googleAuth.idToken,
+      );
+
+      await user.linkWithCredential(credential);
+    }
+    // Reload user to refresh provider data
+    await _auth.currentUser?.reload();
+  }
+
+  /// Link Apple account to current user
+  Future<void> linkWithApple() async {
+    final user = _auth.currentUser;
+    if (user == null) throw Exception('No user signed in');
+
+    final appleProvider = AppleAuthProvider();
+    appleProvider.addScope('email');
+    appleProvider.addScope('name');
+
+    if (kIsWeb) {
+      // On web, use linkWithPopup and capture result to avoid JS interop issues
+      final result = await user.linkWithPopup(appleProvider);
+      if (result.user == null) {
+        throw Exception('Failed to link Apple account');
+      }
+    } else {
+      await user.linkWithProvider(appleProvider);
+    }
+    // Reload user to refresh provider data
+    await _auth.currentUser?.reload();
+  }
+
+  /// Unlink a provider from current user
+  Future<void> unlinkProvider(String providerId) async {
+    final user = _auth.currentUser;
+    if (user == null) throw Exception('No user signed in');
+
+    // Don't allow unlinking if it's the only provider
+    if (user.providerData.length <= 1) {
+      throw Exception('Cannot unlink the only sign-in method');
+    }
+
+    await user.unlink(providerId);
+    await _auth.currentUser?.reload();
+  }
 }
