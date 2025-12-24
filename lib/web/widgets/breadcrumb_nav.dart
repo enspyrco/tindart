@@ -84,7 +84,9 @@ class _BreadcrumbLinkState extends State<_BreadcrumbLink> {
             fontSize: 14,
             color: widget.isLast
                 ? WebColors.textPrimary
-                : (_isHovered ? WebColors.textPrimary : WebColors.textSecondary),
+                : (_isHovered
+                    ? WebColors.textPrimary
+                    : WebColors.textSecondary),
             decoration:
                 isClickable && _isHovered ? TextDecoration.underline : null,
           ),
